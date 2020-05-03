@@ -42,10 +42,7 @@ class _StyledColoredButtonState extends State<StyledColoredButton> {
           : Text(
               widget.label,
               textAlign: TextAlign.center,
-              style: kTextStyle.copyWith(
-                color: widget.color,
-                fontSize: 22,
-              ),
+              style: TextStyle(fontSize: 22),
             ),
     );
 
@@ -59,13 +56,17 @@ class _StyledColoredButtonState extends State<StyledColoredButton> {
             onPressed: onPressed,
             color: color,
             shape: shape,
+            textColor: widget.color,
             child: child,
           )
         : FlatButton(
             onPressed: onPressed,
             color: color,
+            textColor: widget.color,
             shape: shape,
             child: child,
+            disabledColor: Colors.blueGrey,
+            disabledTextColor: Colors.white,
           );
   }
 }

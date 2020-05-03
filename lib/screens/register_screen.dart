@@ -26,6 +26,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: Scaffold(
         appBar: buildRectroBar(context),
         body: ListView(
+          physics: BouncingScrollPhysics(),
           children: <Widget>[
             Container(
               padding: EdgeInsets.all(20),

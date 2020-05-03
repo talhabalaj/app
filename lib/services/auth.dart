@@ -1,15 +1,19 @@
 import 'dart:convert';
-import 'dart:developer';
-
 import 'package:app/constants.dart';
 import 'package:app/models/api_response.dart';
 import 'package:app/models/authtoken.dart';
 import 'package:app/models/error_response.dart';
 import 'package:app/models/user.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
-class AuthService extends ChangeNotifier {
+class AuthServiceError extends Error {
+  final String message;
+
+  AuthServiceError(this.message);
+}
+
+class AuthService {
   AuthToken auth;
 
   Future<void> login(String userName, String password) async {
@@ -32,15 +36,12 @@ class AuthService extends ChangeNotifier {
             WebApiSuccessResponse.fromJson(jsonDecode(res.body));
 
         final token = res.headers["set-cookie"].split(";")[0].split("=")[1];
-        final user = body.data;
+        final secureStorage = FlutterSecureStorage();
+        secureStorage.write(key: 'token', value: token);
 
         auth = AuthToken(
-          user: user,
           token: token,
-          isValid: true,
         );
-
-        notifyListeners();
       } else {
         throw WebApiErrorResponse.fromJson(jsonDecode(res.body));
       }
@@ -71,6 +72,32 @@ class AuthService extends ChangeNotifier {
       login(userName, password);
     } else {
       throw WebApiErrorResponse.fromJson(jsonDecode(res.body));
+    }
+  }
+
+  Future<void> logout() async {
+    if (auth == null) {
+      throw "Oh fuck!";
+    }
+
+    final res = await http.get('${kApiUrl}user/logout', headers: {
+      "Cookie": "access_token=${auth.token}",
+    });
+
+    if (res.statusCode == 200) {
+      auth = null;
+    } else {
+      throw WebApiErrorResponse.fromJson(jsonDecode(res.body));
+    }
+  }
+
+  Future<void> load() async {
+    final secureStorage = FlutterSecureStorage();
+    final data = await secureStorage.readAll();
+    if (data['token'] != null) {
+      auth = AuthToken(token: data['token']);
+    } else {
+      throw AuthServiceError("Not logged in");
     }
   }
 }

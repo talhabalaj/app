@@ -14,6 +14,8 @@ class WebApiSuccessResponse<T> {
     message = json['message'];
     if (T == User) {
       data = User.fromJson(json['data']['user']) as T;
+    } else if (T == Map) {
+      data = json['data'];
     }
   }
 

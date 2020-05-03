@@ -27,23 +27,28 @@ class _LoginScreenState extends State<LoginScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: buildRectroBar(context),
-        body: Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                "Login to proceed",
-                style: kTextStyle.copyWith(
-                  fontSize: 30,
-                ),
+        body: ListView(
+          physics: BouncingScrollPhysics(),
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    "Login to proceed",
+                    style: kTextStyle.copyWith(
+                      fontSize: 30,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 40,
+                  ),
+                  LoginForm(),
+                ],
               ),
-              SizedBox(
-                height: 40,
-              ),
-              LoginForm(),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -72,37 +77,39 @@ class _LoginFormState extends State<LoginForm> {
       enabled = false;
     });
 
-    final auth = Provider.of<AuthService>(context, listen: false);
-    try {
-      await auth.login(userName, password);
-      Navigator.of(context).popAndPushNamed(HomeScreen.id);
-    } on WebApiErrorResponse catch (e) {
-      showDialog(
-        context: context,
-        child: AlertDialog(
-          content: Text(e.message),
-          contentTextStyle: kTextStyle,
-          title: Text(e.type),
-          actions: <Widget>[
-            FlatButton(
-              child: Text("Close"),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-      );
-    } on SocketException catch (e) {
-      Scaffold.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.osError.message),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
+    if (_formkey.currentState.validate()) {
+      final auth = Provider.of<AuthService>(context, listen: false);
+      try {
+        await auth.login(userName, password);
+        Navigator.of(context).popAndPushNamed(HomeScreen.id);
+      } on WebApiErrorResponse catch (e) {
+        showDialog(
+          context: context,
+          child: AlertDialog(
+            content: Text(e.message),
+            contentTextStyle: kTextStyle,
+            title: Text(e.type),
+            actions: <Widget>[
+              FlatButton(
+                child: Text("Close"),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      } on SocketException catch (e) {
+        Scaffold.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.osError.message),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
 
-    _formkey.currentState.reset();
+      _formkey.currentState.reset();
+    }
 
     this.setState(() {
       loading = false;

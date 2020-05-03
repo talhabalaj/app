@@ -1,28 +1,30 @@
+import 'package:app/models/error_response.dart';
+import 'package:app/screens/login_screen.dart';
 import 'package:app/services/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 AppBar buildRectroBar(BuildContext context) {
+  final auth = Provider.of<AuthService>(context);
   return AppBar(
     title: Text("Rectrogram"),
-    centerTitle: true,
     automaticallyImplyLeading: false,
-    elevation: 1,
     actions: <Widget>[
-      IconButton(
-        icon: Icon(
-          Icons.input,
+      if (auth.auth != null)
+        IconButton(
+          icon: Icon(
+            Icons.input,
+          ),
+          onPressed: () async {
+            try {
+              await auth.logout();
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                  LoginScreen.id, (Route<dynamic> route) => false);
+            } on WebApiErrorResponse catch (e) {
+              print(e.message);
+            }
+          },
         ),
-        onPressed: () {
-          final auth = Provider.of<AuthService>(context);
-        },
-      ),
     ],
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.only(
-        bottomLeft: Radius.circular(30),
-        bottomRight: Radius.circular(30),
-      ),
-    ),
   );
 }

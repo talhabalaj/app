@@ -12,8 +12,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    final auth = Provider.of<AuthService>(context);
-
     return SafeArea(
       child: Scaffold(
         appBar: buildRectroBar(context),
@@ -23,14 +21,8 @@ class _HomeScreenState extends State<HomeScreen> {
             margin: EdgeInsets.all(20),
             child: Padding(
               padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text('id: ${auth.auth.user.id}'),
-                  Text('Name: ${auth.auth.user.name}'),
-                  Text('Email: ${auth.auth.user.email}'),
-                ],
+              child: LinearProgressIndicator(
+                value: .5,
               ),
             ),
           ),
