@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:app/constants.dart';
-import 'package:app/models/api_response.dart';
-import 'package:app/models/authtoken.dart';
-import 'package:app/models/error_response.dart';
-import 'package:app/models/user.dart';
+import 'package:app/helpers/authed_request.dart';
+import 'package:app/models/api_response_model.dart';
+import 'package:app/models/authtoken_model.dart';
+import 'package:app/models/error_response_model.dart';
+import 'package:app/models/user_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
@@ -14,13 +15,16 @@ class AuthServiceError extends Error {
 }
 
 class AuthService {
-  AuthToken auth;
+  AuthTokenModel auth;
+  UserModel user;
+
+  final secureStorage = FlutterSecureStorage();
 
   Future<void> login(String userName, String password) async {
     http.Response res;
 
     res = await http.post(
-      '${kApiUrl}user/login',
+      '$kApiUrl/user/login',
       headers: {
         "Content-Type": "application/json",
       },
@@ -32,16 +36,18 @@ class AuthService {
 
     if (res != null) {
       if (res.statusCode == 202) {
-        final WebApiSuccessResponse<User> body =
+        final WebApiSuccessResponse<UserModel> body =
             WebApiSuccessResponse.fromJson(jsonDecode(res.body));
 
         final token = res.headers["set-cookie"].split(";")[0].split("=")[1];
         final secureStorage = FlutterSecureStorage();
         secureStorage.write(key: 'token', value: token);
 
-        auth = AuthToken(
+        auth = AuthTokenModel(
           token: token,
         );
+
+        user = body.data;
       } else {
         throw WebApiErrorResponse.fromJson(jsonDecode(res.body));
       }
@@ -55,7 +61,7 @@ class AuthService {
       String lastName,
       String email}) async {
     final res = await http.post(
-      '${kApiUrl}user/register',
+      '$kApiUrl/user/register',
       headers: {
         "Content-Type": "application/json",
       },
@@ -80,24 +86,27 @@ class AuthService {
       throw "Oh fuck!";
     }
 
-    final res = await http.get('${kApiUrl}user/logout', headers: {
-      "Cookie": "access_token=${auth.token}",
-    });
-
-    if (res.statusCode == 200) {
-      auth = null;
-    } else {
-      throw WebApiErrorResponse.fromJson(jsonDecode(res.body));
+    try {
+      await AuthenticatedRequest(authService: this).request.get('/user/logout');
+    } catch (e) {
+      print("Logout was't preformed on server side.");
     }
+
+    auth = null;
+    user = null;
+    await secureStorage.delete(key: 'token');
   }
 
   Future<void> load() async {
-    final secureStorage = FlutterSecureStorage();
     final data = await secureStorage.readAll();
     if (data['token'] != null) {
-      auth = AuthToken(token: data['token']);
+      auth = AuthTokenModel(token: data['token']);
     } else {
       throw AuthServiceError("Not logged in");
     }
+  }
+
+  Future<void> refresh() {
+    // TODO: implement
   }
 }

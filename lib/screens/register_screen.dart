@@ -1,16 +1,14 @@
-import 'dart:developer';
-
 import 'package:app/components/button_seperator.dart';
-import 'package:app/components/default_appbar.dart';
 import 'package:app/components/styled_button.dart';
 import 'package:app/components/styled_textfield.dart';
 import 'package:app/constants.dart';
+import 'package:app/helpers/error_dialog.dart';
 import 'package:app/screens/home_screen.dart';
 import 'package:app/screens/login_screen.dart';
-import 'package:app/services/auth.dart';
+import 'package:app/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:app/models/error_response.dart';
+import 'package:app/models/error_response_model.dart';
 
 class RegisterScreen extends StatefulWidget {
   static String id = "/register";
@@ -24,7 +22,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: buildRectroBar(context),
         body: ListView(
           physics: BouncingScrollPhysics(),
           children: <Widget>[
@@ -98,22 +95,7 @@ class _RegisterFormState extends State<RegisterForm> {
         );
         Navigator.of(context).popAndPushNamed(HomeScreen.id);
       } on WebApiErrorResponse catch (e) {
-        showDialog(
-          context: context,
-          child: AlertDialog(
-            content: Text(e.message),
-            contentTextStyle: kTextStyle,
-            title: Text(e.type),
-            actions: <Widget>[
-              FlatButton(
-                child: Text("Close"),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        );
+        showErrorDialog(context: context, e: e);
       }
     }
 

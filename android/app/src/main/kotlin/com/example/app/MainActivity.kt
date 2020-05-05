@@ -1,4 +1,4 @@
-package com.example.app
+package com.talha.rectrogram
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

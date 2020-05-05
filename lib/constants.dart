@@ -5,4 +5,6 @@ const kTextStyle = TextStyle(
   color: Colors.black87,
 );
 
-const kApiUrl = "http://192.168.0.108:4000/";
+const kPrimaryColor = Color(0xff03009A);
+
+const kApiUrl = "http://192.168.0.108:4000";
