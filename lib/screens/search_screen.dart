@@ -15,12 +15,11 @@ class _SearchScreenState extends State<SearchScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Container(
-          height: 38,
           child: TextField(
             onChanged: (value) => searchTerm = value,
             decoration: InputDecoration(
               hintText: 'Search',
-              contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+              contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(9),
                 borderSide: BorderSide(

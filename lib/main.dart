@@ -27,16 +27,6 @@ void main() {
         Provider.value(
           value: AuthService(),
         ),
-        ChangeNotifierProxyProvider<AuthService, FeedService>(
-          update: (context, authService, feedService) =>
-              feedService.update(authService),
-          create: (BuildContext context) => FeedService(),
-        ),
-        ChangeNotifierProxyProvider<AuthService, PostService>(
-          update: (context, authService, postService) =>
-              postService.update(authService),
-          create: (BuildContext context) => PostService(),
-        )
       ],
       child: MyApp(),
     ),
@@ -49,6 +39,7 @@ class MyApp extends StatelessWidget {
     FirebaseAnalytics analytics = FirebaseAnalytics();
     IconThemeData iconThemeData = IconThemeData(color: kPrimaryColor);
     TextTheme textThemeData = GoogleFonts.poppinsTextTheme();
+    final authService = Provider.of<AuthService>(context);
 
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
@@ -79,8 +70,19 @@ class MyApp extends StatelessWidget {
         SplashScreen.id: (context) => SplashScreen(),
         LoginScreen.id: (context) => LoginScreen(),
         RegisterScreen.id: (context) => RegisterScreen(),
-        HomeScreen.id: (context) => HomeScreen(),
-        CreatePostScreen.id: (context) => CreatePostScreen(),
+        HomeScreen.id: (context) => MultiProvider(
+              providers: [
+                ChangeNotifierProvider<FeedService>(
+                  create: (BuildContext context) =>
+                      FeedService(authService: authService),
+                ),
+                ChangeNotifierProvider<PostService>(
+                  create: (BuildContext context) =>
+                      PostService(authService: authService),
+                )
+              ],
+              child: HomeScreen(),
+            ),
       },
     );
   }

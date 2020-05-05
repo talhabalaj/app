@@ -4,7 +4,7 @@ import 'package:app/models/user_model.dart';
 
 class PostModel {
   String caption;
-  List<UserModel> likes;
+  List<String> likes;
   List<CommentModel> comments;
   String sId;
   String imageUrl;
@@ -25,9 +25,9 @@ class PostModel {
   PostModel.fromJson(Map<String, dynamic> json) {
     caption = json['caption'];
     if (json['likes'] != null) {
-      likes = new List<UserModel>();
+      likes = new List<String>();
       json['likes'].forEach((v) {
-        likes.add(new UserModel.fromJson(v));
+        likes.add(v);
       });
     }
     if (json['comments'] != null) {
@@ -47,7 +47,7 @@ class PostModel {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['caption'] = this.caption;
     if (this.likes != null) {
-      data['likes'] = this.likes.map((v) => v.toJson()).toList();
+      data['likes'] = this.likes;
     }
     if (this.comments != null) {
       data['comments'] = this.comments.map((v) => v.toJson()).toList();

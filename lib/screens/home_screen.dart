@@ -3,8 +3,11 @@ import 'package:app/models/create_post_model.dart';
 import 'package:app/models/error_response_model.dart';
 import 'package:app/screens/create_post_screen.dart';
 import 'package:app/screens/feed_screen.dart';
+import 'package:app/screens/profile_screen.dart';
 import 'package:app/screens/search_screen.dart';
+import 'package:app/services/auth_service.dart';
 import 'package:app/services/feed_service.dart';
+import 'package:app/services/post_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,13 +20,23 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  AuthService authService;
   int index = 0;
-  final List<Widget> tabs = [
-    FeedScreen(),
-    SearchScreen(),
-    Text("Notifications"),
-    Text("Profile"),
-  ];
+  List<Widget> tabs;
+
+  @override
+  void didChangeDependencies() {
+    authService = Provider.of<AuthService>(context);
+    tabs = [
+      FeedScreen(),
+      SearchScreen(),
+      Text("Notifications"),
+      ProfileScreen(
+        authService: authService,
+      ),
+    ];
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +49,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 await ImagePicker.pickImage(source: ImageSource.gallery);
 
             if (image != null) {
-              final createPost = await Navigator.of(context)
-                  .pushNamed(CreatePostScreen.id, arguments: image);
+              final createPost = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (context) => CreatePostScreen(image: image)));
 
               if (createPost is CreatePostModel) {
                 try {

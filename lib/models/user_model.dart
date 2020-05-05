@@ -4,6 +4,7 @@ class UserModel {
   String userName;
   String firstName;
   String lastName;
+  String bio;
 
   UserModel(
       {this.profilePicUrl,
@@ -18,6 +19,7 @@ class UserModel {
     userName = json['userName'];
     firstName = json['firstName'];
     lastName = json['lastName'];
+    bio = json['bio'];
   }
 
   Map<String, dynamic> toJson() {
@@ -27,6 +29,7 @@ class UserModel {
     data['userName'] = this.userName;
     data['firstName'] = this.firstName;
     data['lastName'] = this.lastName;
+    data['bio'] = this.bio;
     return data;
   }
 }

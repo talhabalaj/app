@@ -36,18 +36,27 @@ class AuthService {
 
     if (res != null) {
       if (res.statusCode == 202) {
-        final WebApiSuccessResponse<UserModel> body =
+        final WebApiSuccessResponse<Map> body =
             WebApiSuccessResponse.fromJson(jsonDecode(res.body));
 
         final token = res.headers["set-cookie"].split(";")[0].split("=")[1];
+        final expiresAt = body.data['tokenInfo']['expiresAt'] as String;
         final secureStorage = FlutterSecureStorage();
         secureStorage.write(key: 'token', value: token);
+        secureStorage.write(key: 'expiresAt', value: expiresAt);
 
         auth = AuthTokenModel(
           token: token,
+          expiresAt: DateTime.parse(expiresAt),
         );
 
-        user = body.data;
+        final resUser = WebApiSuccessResponse<UserModel>.fromJson(
+          (await AuthenticatedRequest(authService: this)
+                  .request
+                  .get('/user/profile'))
+              .data,
+        );
+        user = resUser.data;
       } else {
         throw WebApiErrorResponse.fromJson(jsonDecode(res.body));
       }
@@ -100,7 +109,15 @@ class AuthService {
   Future<void> load() async {
     final data = await secureStorage.readAll();
     if (data['token'] != null) {
-      auth = AuthTokenModel(token: data['token']);
+      auth = AuthTokenModel(
+          token: data['token'], expiresAt: DateTime.parse(data['expiresAt']));
+      final res = WebApiSuccessResponse<UserModel>.fromJson(
+        (await AuthenticatedRequest(authService: this)
+                .request
+                .get('/user/profile'))
+            .data,
+      );
+      user = res.data;
     } else {
       throw AuthServiceError("Not logged in");
     }

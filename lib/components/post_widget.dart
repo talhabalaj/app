@@ -20,7 +20,7 @@ class _PostWidgetState extends State<PostWidget> {
   AuthService authService;
 
   Future<void> toggleLike() async {
-    widget.post.likes.indexOf(authService.user) == -1
+    widget.post.likes.indexOf(authService.user.sId) == -1
         ? await postServce.like(widget.post)
         : await postServce.unlike(widget.post);
   }
@@ -45,6 +45,7 @@ class _PostWidgetState extends State<PostWidget> {
                 color: Colors.grey[300],
               ),
             ),
+            color: Colors.white,
           ),
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
           child: Row(
@@ -79,31 +80,52 @@ class _PostWidgetState extends State<PostWidget> {
             fit: BoxFit.fill,
             height: MediaQuery.of(context).size.width,
             mode: ExtendedImageMode.gesture,
+            initGestureConfigHandler: (state) => GestureConfig(
+              minScale: 1,
+              maxScale: 2,
+            ),
             onDoubleTap: (state) async {
               await toggleLike();
             },
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              IconButton(
-                icon: widget.post.likes.indexOf(authService.user) == -1
-                    ? Icon(EvaIcons.heartOutline)
-                    : Icon(EvaIcons.heart),
-                iconSize: 30,
-                onPressed: () async {
-                  await toggleLike();
-                },
+        IconTheme(
+          data: IconThemeData(color: Colors.grey[800], size: 30),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: BorderDirectional(
+                bottom: BorderSide(
+                  color: Colors.grey[300],
+                ),
               ),
-              IconButton(
-                icon: Icon(EvaIcons.messageSquareOutline),
-                iconSize: 30,
-                onPressed: () {},
-              ),
-            ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                IconButton(
+                  icon: widget.post.likes.indexOf(authService.user.sId) == -1
+                      ? Icon(
+                          EvaIcons.heartOutline,
+                          size: 30,
+                        )
+                      : Icon(
+                          EvaIcons.heart,
+                          color: Colors.red,
+                          size: 30,
+                        ),
+                  onPressed: () async {
+                    await toggleLike();
+                  },
+                ),
+                IconButton(
+                  icon: Icon(EvaIcons.messageSquareOutline),
+                  iconSize: 30,
+                  onPressed: () {},
+                ),
+              ],
+            ),
           ),
         ),
         Container(

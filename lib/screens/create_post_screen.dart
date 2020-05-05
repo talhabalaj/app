@@ -8,6 +8,9 @@ import 'package:image_editor/image_editor.dart';
 
 class CreatePostScreen extends StatefulWidget {
   static String id = '/createCreatePost';
+  final File image;
+
+  CreatePostScreen({this.image});
 
   @override
   _CreatePostScreenState createState() => _CreatePostScreenState();
@@ -19,8 +22,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final File args = ModalRoute.of(context).settings.arguments;
-
     return Scaffold(
       appBar: AppBar(
         title: Text("Create Post"),
@@ -87,7 +88,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         color: Colors.black,
         padding: const EdgeInsets.all(20.0),
         child: ExtendedImage.file(
-          args,
+          widget.image,
           fit: BoxFit.contain,
           mode: ExtendedImageMode.editor,
           extendedImageEditorKey: editorKey,
