@@ -3,6 +3,7 @@ import 'package:app/models/create_post_model.dart';
 import 'package:app/models/error_response_model.dart';
 import 'package:app/screens/create_post_screen.dart';
 import 'package:app/screens/feed_screen.dart';
+import 'package:app/screens/search_screen.dart';
 import 'package:app/services/feed_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int index = 0;
   final List<Widget> tabs = [
     FeedScreen(),
-    Text("Search"),
+    SearchScreen(),
     Text("Notifications"),
     Text("Profile"),
   ];
@@ -28,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
             final image =

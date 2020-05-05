@@ -1,5 +1,4 @@
 import 'package:app/models/post_model.dart';
-import 'package:app/models/user_model.dart';
 import 'package:app/services/auth_service.dart';
 import 'package:app/services/post_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
@@ -7,15 +6,34 @@ import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class PostWidget extends StatelessWidget {
+class PostWidget extends StatefulWidget {
   final PostModel post;
 
   const PostWidget({Key key, this.post}) : super(key: key);
 
   @override
+  _PostWidgetState createState() => _PostWidgetState();
+}
+
+class _PostWidgetState extends State<PostWidget> {
+  PostService postServce;
+  AuthService authService;
+
+  Future<void> toggleLike() async {
+    widget.post.likes.indexOf(authService.user) == -1
+        ? await postServce.like(widget.post)
+        : await postServce.unlike(widget.post);
+  }
+
+  @override
+  void didChangeDependencies() {
+    postServce = Provider.of<PostService>(context);
+    authService = Provider.of<AuthService>(context);
+    super.didChangeDependencies();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    PostService postServce = Provider.of<PostService>(context);
-    AuthService authService = Provider.of<AuthService>(context);
     return Column(
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,14 +51,14 @@ class PostWidget extends StatelessWidget {
             children: <Widget>[
               CircleAvatar(
                 backgroundImage: ExtendedNetworkImageProvider(
-                  post.user.profilePicUrl,
+                  widget.post.user.profilePicUrl,
                   cache: true,
                 ),
               ),
               SizedBox(
                 width: 10,
               ),
-              Text('${post.user.userName}'),
+              Text('${widget.post.user.userName}'),
             ],
           ),
         ),
@@ -56,10 +74,14 @@ class PostWidget extends StatelessWidget {
             ),
           ),
           child: ExtendedImage.network(
-            post.imageUrl,
+            widget.post.imageUrl,
             cache: true,
             fit: BoxFit.fill,
             height: MediaQuery.of(context).size.width,
+            mode: ExtendedImageMode.gesture,
+            onDoubleTap: (state) async {
+              await toggleLike();
+            },
           ),
         ),
         Padding(
@@ -68,14 +90,12 @@ class PostWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               IconButton(
-                icon: post.likes.indexOf(authService.user) == -1
+                icon: widget.post.likes.indexOf(authService.user) == -1
                     ? Icon(EvaIcons.heartOutline)
                     : Icon(EvaIcons.heart),
                 iconSize: 30,
-                onPressed: () {
-                  post.likes.indexOf(authService.user) == -1
-                      ? postServce.like(post)
-                      : postServce.unlike(post);
+                onPressed: () async {
+                  await toggleLike();
                 },
               ),
               IconButton(
@@ -92,24 +112,27 @@ class PostWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                '${post.likes.length} likes',
+                '${widget.post.likes.length} likes',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Text.rich(
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: post.user.userName,
+                      text: widget.post.user.userName,
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     TextSpan(text: " "),
-                    TextSpan(text: post.caption)
+                    TextSpan(text: widget.post.caption)
                   ],
                 ),
               )
             ],
           ),
-        )
+        ),
+        SizedBox(
+          height: 30,
+        ),
       ],
     );
   }
