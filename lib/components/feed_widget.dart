@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:app/components/post_widget.dart';
@@ -22,42 +23,52 @@ class FeedWidget extends StatefulWidget {
 class _FeedWidgetState extends State<FeedWidget> {
   FeedService feedService;
 
-  Future<bool> refreshFeed() async {
+  int indexRequested;
+
+  Future<void> refreshFeed() async {
     try {
       await feedService.refreshFeed();
-      return true;
     } on WebApiErrorResponse catch (e) {
       showErrorDialog(context: context, e: e);
-      return false;
     } catch (e) {
-      throw e;
+      print(e);
     }
   }
 
   @override
-  void initState() {
+  void didChangeDependencies() {
     feedService = widget.feedService;
     refreshFeed();
-    super.initState();
+    super.didChangeDependencies();
   }
 
   @override
   Widget build(BuildContext context) {
     final PostService postService = Provider.of<PostService>(context);
+
     return RefreshIndicator(
       onRefresh: () async {
         await refreshFeed();
       },
-      child: ListView(
+      // for (final post in postService.postQueue)
+      //   CreatePostWidget(post: post, feedService: feedService),
+      child: ListView.builder(
         physics: BouncingScrollPhysics(),
-        children: <Widget>[
-          for (final post in postService.postQueue)
-            CreatePostWidget(post: post, feedService: feedService),
-          for (final post in feedService.feed.posts)
-            PostWidget(
-              post: post,
-            )
-        ],
+        itemBuilder: (context, index) {
+          if (index < feedService.feed.posts.length) {
+            return PostWidget(
+              post: feedService.feed.posts[index],
+            );
+          } else {
+            print('called $index');
+            if (indexRequested <= index && feedService.feed.posts.length != 0) {
+              print('called! old post getter!');
+              feedService.getOldPost();
+              indexRequested = index;
+            }
+            return null;
+          }
+        },
       ),
     );
   }

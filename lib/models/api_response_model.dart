@@ -1,4 +1,5 @@
 import 'package:app/models/feed_model.dart';
+import 'package:app/models/post_model.dart';
 import 'package:app/models/user_model.dart';
 import 'package:flutter/widgets.dart';
 
@@ -20,6 +21,8 @@ class WebApiSuccessResponse<T> {
         data = UserModel.fromJson(json['data']['user']) as T;
       } else if (T == FeedModel) {
         data = FeedModel.fromJson(json['data']['posts']) as T;
+      } else if (T == PostModel) {
+        data = PostModel.fromJson(json['data']['post']) as T;
       } else if (T == Map) {
         data = json['data'];
       } else if (isSubtype<T, List<UserModel>>()) {

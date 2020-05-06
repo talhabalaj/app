@@ -3,6 +3,7 @@ import 'package:app/models/error_response_model.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/screens/profile_screen.dart';
 import 'package:app/services/auth_service.dart';
+import 'package:app/services/search_service.dart';
 import 'package:app/services/user_service.dart';
 import 'package:dio/dio.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
@@ -18,20 +19,12 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   AuthService authService;
-  UserService userService;
-
-  String searchTerm = '';
-  List<UserModel> list = new List<UserModel>();
-
-  bool loading = false;
-  bool searched = false;
-
-  CancelToken cancelToken;
+  SearchService searchService;
 
   @override
   void didChangeDependencies() {
     authService = Provider.of<AuthService>(context);
-    userService = Provider.of<UserService>(context);
+    searchService = Provider.of<SearchService>(context);
     super.didChangeDependencies();
   }
 
@@ -41,45 +34,20 @@ class _SearchScreenState extends State<SearchScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Container(
-          child: TextField(
+          child: TextFormField(
+            initialValue: searchService.searchTerm,
             onChanged: (value) async {
-              if (value == '') {
-                setState(() {
-                  list.removeRange(0, list.length);
-                });
-                return;
-              }
-
-              if (searched) {
-                searched = false;
-                cancelToken.cancel();
-              }
-
-              cancelToken = new CancelToken();
-
-              this.setState(() {
-                loading = true;
-              });
-
               try {
-                final data =
-                    await userService.search(value, cancelToken: cancelToken);
-                this.setState(() {
-                  list = data;
-                });
+                await searchService.search(value);
               } on WebApiErrorResponse catch (e) {
                 showErrorDialog(context: context, e: e);
               } on DioError catch (e) {
                 if (e.type != DioErrorType.CANCEL) {
-                  throw e;
+                  print(e.error);
                 } else {
                   print('Cancelled!');
                 }
               }
-
-              this.setState(() {
-                loading = false;
-              });
             },
             decoration: InputDecoration(
               hintText: 'Search',
@@ -112,7 +80,7 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
       body: Container(
         child: Column(
-          children: loading
+          children: searchService.loading
               ? <Widget>[
                   Expanded(
                     child: SpinKitChasingDots(
@@ -121,8 +89,8 @@ class _SearchScreenState extends State<SearchScreen> {
                   )
                 ]
               : <Widget>[
-                  if (list.length > 0)
-                    ...list
+                  if (searchService.list.length > 0)
+                    ...searchService.list
                         .map(
                           (user) => UserSearchResult(
                             user: user,
@@ -134,7 +102,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       padding: EdgeInsets.all(30),
                       alignment: Alignment.center,
                       child: Text(
-                          searchTerm.length > 0
+                          searchService.searchTerm.length > 0
                               ? 'No result found!'
                               : 'Type in the search bar to search!',
                           style: TextStyle(color: Colors.grey[500])),

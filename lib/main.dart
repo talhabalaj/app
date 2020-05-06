@@ -7,6 +7,7 @@ import 'package:app/screens/splash_screen.dart';
 import 'package:app/services/auth_service.dart';
 import 'package:app/services/feed_service.dart';
 import 'package:app/services/post_service.dart';
+import 'package:app/services/search_service.dart';
 import 'package:app/services/user_service.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
@@ -57,6 +58,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<PostService>(
           create: (BuildContext context) =>
               PostService(authService: authService),
+        ),
+        ChangeNotifierProvider<SearchService>(
+          create: (BuildContext context) =>
+              SearchService(authService: authService),
         ),
         ChangeNotifierProvider<UserService>(
           create: (BuildContext context) =>

@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:app/helpers/authed_request.dart';
+import 'package:app/models/api_response_model.dart';
 import 'package:app/models/create_post_model.dart';
 import 'package:app/models/error_response_model.dart';
 import 'package:app/services/auth_service.dart';
@@ -50,7 +51,7 @@ class PostService extends ChangeNotifier {
     return this;
   }
 
-  Future<void> createPost(CreatePostModel newPost) async {
+  Future<PostModel> createPost(CreatePostModel newPost) async {
     FormData formData = new FormData.fromMap({
       "caption": newPost.caption,
       "image": MultipartFile.fromBytes(
@@ -71,8 +72,6 @@ class PostService extends ChangeNotifier {
             '/post/create',
             data: formData,
           );
-      postQueue.remove(newPost);
-      notifyListeners();
     } on DioError catch (e) {
       if (e.type == DioErrorType.RESPONSE) {
         res = e.response;
@@ -81,12 +80,13 @@ class PostService extends ChangeNotifier {
       }
     }
 
-    if (res != null) {
-      if (res.statusCode == 200) {
-        print("uploaded");
-      } else {
-        throw WebApiErrorResponse.fromJson(res.data);
-      }
+    if (res.statusCode == 200) {
+      postQueue.remove(newPost);
+      notifyListeners();
+
+      return WebApiSuccessResponse<PostModel>.fromJson(res.data).data;
+    } else {
+      throw WebApiErrorResponse.fromJson(res.data);
     }
   }
 }

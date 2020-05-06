@@ -49,10 +49,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
               if (createPost is CreatePostModel) {
                 try {
-                  await Provider.of<PostService>(context, listen: false)
-                      .createPost(createPost);
-                  await Provider.of<FeedService>(context, listen: false)
-                      .refreshFeed();
+                  final newPost =
+                      await Provider.of<PostService>(context, listen: false)
+                          .createPost(createPost);
+                  Provider.of<FeedService>(context, listen: false)
+                      .feed
+                      .posts
+                      .insert(0, newPost);
                 } on WebApiErrorResponse catch (e) {
                   showErrorDialog(context: context, e: e);
                 }
