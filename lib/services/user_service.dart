@@ -8,8 +8,5 @@ class UserService extends ChangeNotifier {
 
   UserModel get user => _user;
 
-  UserService update(AuthService authService) {
-    this.authService = authService;
-    return this;
-  }
+  UserService({this.authService});
 }

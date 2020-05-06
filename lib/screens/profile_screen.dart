@@ -1,7 +1,7 @@
+import 'package:app/components/profile_widget.dart';
 import 'package:app/models/error_response_model.dart';
 import 'package:app/services/auth_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
-import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 
 import 'login_screen.dart';
@@ -46,41 +46,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          SizedBox(
-            width: double.infinity,
-            height: 20,
-          ),
-          CircleAvatar(
-            radius: 60,
-            backgroundImage: ExtendedNetworkImageProvider(
-              widget.authService.user.profilePicUrl,
-              cache: true,
-            ),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Text(
-            '${widget.authService.user.firstName} ${widget.authService.user.lastName}',
-            style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              widget.authService.user.bio,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w100,
-                color: Colors.grey[600],
-              ),
-            ),
-          ),
-        ],
-      ),
+      body: ProfileWidget(user: widget.authService.user),
     );
   }
 }

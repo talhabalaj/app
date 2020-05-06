@@ -1,4 +1,5 @@
 import 'package:app/models/post_model.dart';
+import 'package:app/models/user_model.dart';
 import 'package:app/services/auth_service.dart';
 import 'package:app/services/post_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
@@ -38,30 +39,8 @@ class _PostWidgetState extends State<PostWidget> {
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Container(
-          decoration: BoxDecoration(
-            border: BorderDirectional(
-              top: BorderSide(
-                color: Colors.grey[300],
-              ),
-            ),
-            color: Colors.white,
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-          child: Row(
-            children: <Widget>[
-              CircleAvatar(
-                backgroundImage: ExtendedNetworkImageProvider(
-                  widget.post.user.profilePicUrl,
-                  cache: true,
-                ),
-              ),
-              SizedBox(
-                width: 10,
-              ),
-              Text('${widget.post.user.userName}'),
-            ],
-          ),
+        PostTopBar(
+          user: widget.post.user,
         ),
         Container(
           decoration: BoxDecoration(
@@ -128,34 +107,81 @@ class _PostWidgetState extends State<PostWidget> {
             ),
           ),
         ),
-        Container(
-          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                '${widget.post.likes.length} likes',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: widget.post.user.userName,
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    TextSpan(text: " "),
-                    TextSpan(text: widget.post.caption)
-                  ],
-                ),
-              )
-            ],
-          ),
-        ),
+        PostBottomDetails(post: widget.post),
         SizedBox(
           height: 30,
         ),
       ],
+    );
+  }
+}
+
+class PostTopBar extends StatelessWidget {
+  const PostTopBar({Key key, this.user}) : super(key: key);
+
+  final UserModel user;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: BorderDirectional(
+          top: BorderSide(
+            color: Colors.grey[300],
+          ),
+        ),
+        color: Colors.white,
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+      child: Row(
+        children: <Widget>[
+          CircleAvatar(
+            backgroundImage: ExtendedNetworkImageProvider(
+              user.profilePicUrl,
+              cache: true,
+            ),
+          ),
+          SizedBox(
+            width: 10,
+          ),
+          Text('${user.userName}'),
+        ],
+      ),
+    );
+  }
+}
+
+class PostBottomDetails extends StatelessWidget {
+  const PostBottomDetails({Key key, this.post}) : super(key: key);
+
+  final PostModel post;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            '${post.likes.length} likes',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          if (post.caption != '')
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: post.user.userName,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(text: " "),
+                  TextSpan(text: post.caption)
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

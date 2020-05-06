@@ -53,10 +53,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   MaterialPageRoute(
                       builder: (context) => CreatePostScreen(image: image)));
 
+              this.setState(() {
+                index = 0;
+              });
+
               if (createPost is CreatePostModel) {
                 try {
-                  await Provider.of<FeedService>(context, listen: false)
+                  await Provider.of<PostService>(context, listen: false)
                       .createPost(createPost);
+                  await Provider.of<FeedService>(context, listen: false)
+                      .refreshFeed();
                 } on WebApiErrorResponse catch (e) {
                   showErrorDialog(context: context, e: e);
                 }

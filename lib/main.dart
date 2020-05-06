@@ -79,6 +79,10 @@ class MyApp extends StatelessWidget {
                 ChangeNotifierProvider<PostService>(
                   create: (BuildContext context) =>
                       PostService(authService: authService),
+                ),
+                ChangeNotifierProvider<UserService>(
+                  create: (BuildContext context) =>
+                      UserService(authService: authService),
                 )
               ],
               child: HomeScreen(),
