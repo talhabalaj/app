@@ -48,46 +48,46 @@ class MyApp extends StatelessWidget {
       ),
     );
 
-    return MaterialApp(
-      initialRoute: SplashScreen.id,
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        accentColor: kPrimaryColor,
-        iconTheme: iconThemeData,
-        appBarTheme: AppBarTheme(
-          color: Colors.white,
-          brightness: Brightness.dark,
-          textTheme: textThemeData,
-          elevation: 0,
-          iconTheme: iconThemeData,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<FeedService>(
+          create: (BuildContext context) =>
+              FeedService(authService: authService),
         ),
-        textTheme: textThemeData,
-      ),
-      navigatorObservers: [
-        FirebaseAnalyticsObserver(analytics: analytics),
+        ChangeNotifierProvider<PostService>(
+          create: (BuildContext context) =>
+              PostService(authService: authService),
+        ),
+        ChangeNotifierProvider<UserService>(
+          create: (BuildContext context) =>
+              UserService(authService: authService),
+        )
       ],
-      routes: {
-        SplashScreen.id: (context) => SplashScreen(),
-        LoginScreen.id: (context) => LoginScreen(),
-        RegisterScreen.id: (context) => RegisterScreen(),
-        HomeScreen.id: (context) => MultiProvider(
-              providers: [
-                ChangeNotifierProvider<FeedService>(
-                  create: (BuildContext context) =>
-                      FeedService(authService: authService),
-                ),
-                ChangeNotifierProvider<PostService>(
-                  create: (BuildContext context) =>
-                      PostService(authService: authService),
-                ),
-                ChangeNotifierProvider<UserService>(
-                  create: (BuildContext context) =>
-                      UserService(authService: authService),
-                )
-              ],
-              child: HomeScreen(),
-            ),
-      },
+      child: MaterialApp(
+        initialRoute: SplashScreen.id,
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          accentColor: kPrimaryColor,
+          iconTheme: iconThemeData,
+          appBarTheme: AppBarTheme(
+            color: Colors.white,
+            brightness: Brightness.dark,
+            textTheme: textThemeData,
+            elevation: 0,
+            iconTheme: iconThemeData,
+          ),
+          textTheme: textThemeData,
+        ),
+        navigatorObservers: [
+          FirebaseAnalyticsObserver(analytics: analytics),
+        ],
+        routes: {
+          SplashScreen.id: (context) => SplashScreen(),
+          LoginScreen.id: (context) => LoginScreen(),
+          RegisterScreen.id: (context) => RegisterScreen(),
+          HomeScreen.id: (context) => HomeScreen(),
+        },
+      ),
     );
   }
 }

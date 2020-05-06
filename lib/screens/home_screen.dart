@@ -3,8 +3,8 @@ import 'package:app/models/create_post_model.dart';
 import 'package:app/models/error_response_model.dart';
 import 'package:app/screens/create_post_screen.dart';
 import 'package:app/screens/feed_screen.dart';
-import 'package:app/screens/profile_screen.dart';
 import 'package:app/screens/search_screen.dart';
+import 'package:app/screens/user_screen.dart';
 import 'package:app/services/auth_service.dart';
 import 'package:app/services/feed_service.dart';
 import 'package:app/services/post_service.dart';
@@ -20,23 +20,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  AuthService authService;
   int index = 0;
-  List<Widget> tabs;
-
-  @override
-  void didChangeDependencies() {
-    authService = Provider.of<AuthService>(context);
-    tabs = [
-      FeedScreen(),
-      SearchScreen(),
-      Text("Notifications"),
-      ProfileScreen(
-        authService: authService,
-      ),
-    ];
-    super.didChangeDependencies();
-  }
+  List<Widget> tabs = [
+    FeedScreen(),
+    SearchScreen(),
+    Text("Notifications"),
+    UserScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {

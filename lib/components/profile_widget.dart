@@ -42,24 +42,6 @@ class ProfileWidget extends StatelessWidget {
             ),
           ),
         ),
-        RaisedButton(
-          child: Text('Edit profile'),
-          onPressed: () {},
-        ),
-        SizedBox(
-          height: 30,
-        ),
-        Expanded(
-          child: GridView.count(
-            crossAxisCount: 3,
-            childAspectRatio: 1 / 1,
-            physics: BouncingScrollPhysics(),
-            children: <Widget>[
-              ExtendedImage.network(user.profilePicUrl),
-              ExtendedImage.network(user.profilePicUrl),
-            ],
-          ),
-        )
       ],
     );
   }
