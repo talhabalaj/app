@@ -1,10 +1,12 @@
 import 'dart:io';
 
-import 'package:app/models/create_post_model.dart';
+import 'package:app/models/post_model.dart';
+import 'package:app/services/auth_service.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_editor/image_editor.dart';
+import 'package:provider/provider.dart';
 
 class CreatePostScreen extends StatefulWidget {
   static String id = '/createCreatePost';
@@ -78,8 +80,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   result.toList(),
                   format: CompressFormat.jpeg);
               String caption = controller.text;
-              Navigator.pop<CreatePostModel>(
-                  context, CreatePostModel(image, caption));
+              Navigator.pop<PostModel>(
+                  context,
+                  PostModel.inMemory(
+                      image: image,
+                      caption: caption,
+                      user: Provider.of<AuthService>(context, listen: false)
+                          .user));
             },
           ),
         ],

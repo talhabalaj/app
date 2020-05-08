@@ -1,6 +1,8 @@
-import 'package:app/helpers/authed_request.dart';
+import 'package:app/helpers/random.dart';
 import 'package:app/models/comment_model.dart';
 import 'package:app/models/user_model.dart';
+
+enum PostStateType { MEMORY, NETWORK }
 
 class PostModel {
   String caption;
@@ -11,18 +13,20 @@ class PostModel {
   UserModel user;
   String createdAt;
   String updatedAt;
+  PostStateType stateType;
+  List<int> image;
 
-  PostModel(
-      {this.caption,
-      this.likes,
-      this.comments,
-      this.sId,
-      this.imageUrl,
-      this.user,
-      this.createdAt,
-      this.updatedAt});
+  PostModel.inMemory({this.caption, this.image, this.user}) {
+    if (this.image != null) {
+      stateType = PostStateType.MEMORY;
+      likes = [];
+      comments = [];
+      sId = RandomString.createCryptoRandomString();
+    }
+  }
 
   PostModel.fromJson(Map<String, dynamic> json) {
+    stateType = PostStateType.NETWORK;
     caption = json['caption'];
     if (json['likes'] != null) {
       likes = new List<String>();

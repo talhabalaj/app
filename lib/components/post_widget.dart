@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:app/models/post_model.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/services/auth_service.dart';
@@ -35,10 +37,19 @@ class _PostWidgetState extends State<PostWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isNetworkPost = widget.post.stateType == PostStateType.NETWORK;
+    final Function like = isNetworkPost
+        ? () async {
+            await toggleLike();
+          }
+        : null;
+    final Function comment = isNetworkPost ? () {} : null;
+
     return Column(
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
+        if (!isNetworkPost) LinearProgressIndicator(),
         PostTopBar(
           user: widget.post.user,
         ),
@@ -53,20 +64,24 @@ class _PostWidgetState extends State<PostWidget> {
               ),
             ),
           ),
-          child: ExtendedImage.network(
-            widget.post.imageUrl,
-            cache: true,
-            fit: BoxFit.fill,
-            height: MediaQuery.of(context).size.width,
-            mode: ExtendedImageMode.gesture,
-            initGestureConfigHandler: (state) => GestureConfig(
-              minScale: 1,
-              maxScale: 2,
-            ),
-            onDoubleTap: (state) async {
-              await toggleLike();
-            },
-          ),
+          child: isNetworkPost
+              ? ExtendedImage.network(
+                  widget.post.imageUrl,
+                  cache: true,
+                  fit: BoxFit.fill,
+                  height: MediaQuery.of(context).size.width,
+                  mode: ExtendedImageMode.gesture,
+                  initGestureConfigHandler: (state) => GestureConfig(
+                    minScale: 1,
+                    maxScale: 2,
+                  ),
+                  onDoubleTap: (state) => like,
+                )
+              : ExtendedImage.memory(
+                  Uint8List.fromList(widget.post.image),
+                  height: MediaQuery.of(context).size.width,
+                  fit: BoxFit.fill,
+                ),
         ),
         IconTheme(
           data: IconThemeData(color: Colors.grey[800], size: 30),
@@ -94,14 +109,12 @@ class _PostWidgetState extends State<PostWidget> {
                           color: Colors.red,
                           size: 30,
                         ),
-                  onPressed: () async {
-                    await toggleLike();
-                  },
+                  onPressed: like,
                 ),
                 IconButton(
                   icon: Icon(EvaIcons.messageSquareOutline),
                   iconSize: 30,
-                  onPressed: () {},
+                  onPressed: comment,
                 ),
               ],
             ),

@@ -126,10 +126,15 @@ class UserSearchResult extends StatelessWidget {
   Widget build(BuildContext context) {
     return FlatButton(
       onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => ProfileScreen(user: user)),
-        );
+        String currentUserId =
+            Provider.of<AuthService>(context, listen: false).user.sId;
+
+        if (currentUserId != user.sId) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ProfileScreen(user: user)),
+          );
+        }
       },
       padding: EdgeInsets.symmetric(horizontal: 18, vertical: 10),
       child: Row(

@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:app/constants.dart';
 import 'package:app/helpers/authed_request.dart';
 import 'package:app/models/api_response_model.dart';
 import 'package:app/models/authtoken_model.dart';
 import 'package:app/models/error_response_model.dart';
 import 'package:app/models/user_model.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
@@ -14,7 +16,7 @@ class AuthServiceError extends Error {
   AuthServiceError(this.message);
 }
 
-class AuthService {
+class AuthService extends ChangeNotifier {
   AuthTokenModel auth;
   UserModel user;
 
@@ -57,6 +59,7 @@ class AuthService {
               .data,
         );
         user = resUser.data;
+        notifyListeners();
       } else {
         throw WebApiErrorResponse.fromJson(jsonDecode(res.body));
       }
@@ -103,6 +106,7 @@ class AuthService {
 
     auth = null;
     user = null;
+    notifyListeners();
     await secureStorage.delete(key: 'token');
   }
 
@@ -125,5 +129,11 @@ class AuthService {
 
   Future<void> refresh() {
     // TODO: implement
+  }
+
+  @override
+  void dispose() {
+    log('The Authservice has been disposed');
+    super.dispose();
   }
 }

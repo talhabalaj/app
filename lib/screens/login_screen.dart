@@ -79,6 +79,7 @@ class _LoginFormState extends State<LoginForm> {
       final auth = Provider.of<AuthService>(context, listen: false);
       try {
         await auth.login(userName, password);
+        _formkey.currentState.reset();
         Navigator.of(context).popAndPushNamed(HomeScreen.id);
       } on WebApiErrorResponse catch (e) {
         showErrorDialog(context: context, e: e);
@@ -90,8 +91,6 @@ class _LoginFormState extends State<LoginForm> {
           ),
         );
       }
-
-      _formkey.currentState.reset();
     }
 
     this.setState(() {

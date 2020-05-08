@@ -1,13 +1,11 @@
 import 'package:app/helpers/error_dialog.dart';
-import 'package:app/models/create_post_model.dart';
 import 'package:app/models/error_response_model.dart';
+import 'package:app/models/post_model.dart';
 import 'package:app/screens/create_post_screen.dart';
 import 'package:app/screens/feed_screen.dart';
 import 'package:app/screens/search_screen.dart';
 import 'package:app/screens/user_screen.dart';
-import 'package:app/services/auth_service.dart';
 import 'package:app/services/feed_service.dart';
-import 'package:app/services/post_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -40,22 +38,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
             if (image != null) {
               final createPost = await Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (context) => CreatePostScreen(image: image)));
+                MaterialPageRoute(
+                  builder: (context) => CreatePostScreen(image: image),
+                ),
+              );
 
               this.setState(() {
                 index = 0;
               });
 
-              if (createPost is CreatePostModel) {
+              if (createPost is PostModel) {
                 try {
-                  final newPost =
-                      await Provider.of<PostService>(context, listen: false)
-                          .createPost(createPost);
-                  Provider.of<FeedService>(context, listen: false)
-                      .feed
-                      .posts
-                      .insert(0, newPost);
+                  await Provider.of<FeedService>(context, listen: false)
+                      .createPost(createPost);
                 } on WebApiErrorResponse catch (e) {
                   showErrorDialog(context: context, e: e);
                 }

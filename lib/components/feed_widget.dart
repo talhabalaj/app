@@ -1,15 +1,9 @@
-import 'dart:developer';
-import 'dart:typed_data';
-
 import 'package:app/components/post_widget.dart';
 import 'package:app/helpers/error_dialog.dart';
-import 'package:app/models/create_post_model.dart';
 import 'package:app/services/feed_service.dart';
-import 'package:app/services/post_service.dart';
-import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:app/models/error_response_model.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class FeedWidget extends StatefulWidget {
   final FeedService feedService;
@@ -22,8 +16,13 @@ class FeedWidget extends StatefulWidget {
 
 class _FeedWidgetState extends State<FeedWidget> {
   FeedService feedService;
+  int indexRequested = 0;
 
-  int indexRequested;
+  @override
+  void initState() {
+    feedService = widget.feedService;
+    super.initState();
+  }
 
   Future<void> refreshFeed() async {
     try {
@@ -35,102 +34,67 @@ class _FeedWidgetState extends State<FeedWidget> {
     }
   }
 
-  @override
-  void didChangeDependencies() {
-    feedService = widget.feedService;
-    refreshFeed();
-    super.didChangeDependencies();
+  Future<void> initFeed() async {
+    try {
+      await feedService.initFeed();
+    } on WebApiErrorResponse catch (e) {
+      showErrorDialog(context: context, e: e);
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final PostService postService = Provider.of<PostService>(context);
+    if (feedService.feed == null)
+      return SpinKitChasingDots(
+        color: Theme.of(context).accentColor,
+      );
+
+    final feed = feedService.feed;
 
     return RefreshIndicator(
       onRefresh: () async {
         await refreshFeed();
       },
-      // for (final post in postService.postQueue)
-      //   CreatePostWidget(post: post, feedService: feedService),
       child: ListView.builder(
-        physics: BouncingScrollPhysics(),
+        physics: AlwaysScrollableScrollPhysics(),
         itemBuilder: (context, index) {
-          if (index < feedService.feed.posts.length) {
+          if (index < feed.posts.length) {
             return PostWidget(
-              post: feedService.feed.posts[index],
+              post: feed.posts[index],
             );
           } else {
-            print('called $index');
-            if (indexRequested <= index && feedService.feed.posts.length != 0) {
-              print('called! old post getter!');
+            if (indexRequested < index && feed.posts.length != 0) {
               feedService.getOldPost();
-              indexRequested = index;
+              indexRequested = index + 1;
+              return SpinKitChasingDots(
+                color: Theme.of(context).accentColor,
+              );
+            }
+
+            if (feed.posts.length == 0 && index == 0) {
+              final child = feedService.loading
+                  ? SpinKitChasingDots(
+                      color: Theme.of(context).accentColor,
+                    )
+                  : Text(
+                      'No posts to show',
+                      style: TextStyle(
+                        color: Colors.grey[500],
+                      ),
+                    );
+              return Container(
+                padding: EdgeInsets.all(8),
+                alignment: Alignment.center,
+                height: 50,
+                child: child,
+              );
             }
             return null;
           }
         },
       ),
     );
-  }
-}
-
-class CreatePostWidget extends StatefulWidget {
-  const CreatePostWidget({
-    Key key,
-    @required this.post,
-    @required this.feedService,
-  }) : super(key: key);
-
-  final CreatePostModel post;
-  final FeedService feedService;
-
-  @override
-  _CreatePostWidgetState createState() => _CreatePostWidgetState();
-}
-
-class _CreatePostWidgetState extends State<CreatePostWidget>
-    with TickerProviderStateMixin {
-  AnimationController controller;
-  Animation<double> animation;
-
-  @override
-  void initState() {
-    controller = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 500),
-    );
-    animation = Tween(begin: 0.0, end: 1.0).animate(controller);
-    controller.forward();
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: animation,
-      child: SizeTransition(
-        sizeFactor: animation,
-        child: Column(
-          children: <Widget>[
-            LinearProgressIndicator(),
-            PostTopBar(user: widget.feedService.authService.user),
-            ExtendedImage.memory(
-              Uint8List.fromList(widget.post.image),
-              height: MediaQuery.of(context).size.width,
-              fit: BoxFit.fill,
-            ),
-            SizedBox(
-              height: 30,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
   }
 }

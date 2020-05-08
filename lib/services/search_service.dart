@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:app/helpers/authed_request.dart';
 import 'package:app/models/api_response_model.dart';
 import 'package:app/models/error_response_model.dart';
@@ -16,12 +18,29 @@ class SearchService extends ChangeNotifier {
 
   CancelToken cancelToken;
 
-  SearchService({@required this.authService});
+  SearchService();
+
+  SearchService update(AuthService authService) {
+    print(
+        '[SearchService] updated! ${authService.user != null ? authService.user.userName : ''}');
+    if (authService.user != null) this.reset();
+    this.authService = authService;
+    return this;
+  }
+
+  void reset() {
+    searchTerm = '';
+    list = new List<UserModel>();
+    loading = false;
+    cancelToken = null;
+    notifyListeners();
+  }
 
   Future<void> search(String query) async {
     if (query == '') {
       searchTerm = '';
       list.removeRange(0, list.length);
+      notifyListeners();
       return;
     }
 
@@ -56,5 +75,11 @@ class SearchService extends ChangeNotifier {
     } else {
       throw WebApiErrorResponse.fromJson(res.data);
     }
+  }
+
+  @override
+  void dispose() {
+    log('The search_service has been disposed');
+    super.dispose();
   }
 }

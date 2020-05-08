@@ -1,6 +1,10 @@
 import 'package:app/components/profile_widget.dart';
 import 'package:app/models/error_response_model.dart';
 import 'package:app/services/auth_service.dart';
+import 'package:app/services/feed_service.dart';
+import 'package:app/services/post_service.dart';
+import 'package:app/services/search_service.dart';
+import 'package:app/services/user_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +21,7 @@ class _UserScreenState extends State<UserScreen> {
   @override
   Widget build(BuildContext context) {
     final AuthService authService = Provider.of<AuthService>(context);
+    if (authService.user == null) return Text('Not loading');
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -35,9 +40,9 @@ class _UserScreenState extends State<UserScreen> {
               ),
               onPressed: () async {
                 try {
-                  await authService.logout();
                   Navigator.of(context).pushNamedAndRemoveUntil(
                       LoginScreen.id, (Route<dynamic> route) => false);
+                  await authService.logout();
                 } on WebApiErrorResponse catch (e) {
                   print(e.message);
                 }

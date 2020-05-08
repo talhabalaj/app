@@ -1,5 +1,4 @@
 import 'package:app/constants.dart';
-import 'package:app/screens/create_post_screen.dart';
 import 'package:app/screens/home_screen.dart';
 import 'package:app/screens/login_screen.dart';
 import 'package:app/screens/register_screen.dart';
@@ -25,9 +24,29 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
-        Provider.value(
-          value: AuthService(),
+        ChangeNotifierProvider(
+          create: (context) => AuthService(),
         ),
+        ChangeNotifierProxyProvider<AuthService, FeedService>(
+          create: (BuildContext context) => FeedService(),
+          update: (BuildContext context, authService, feedService) =>
+              feedService.update(authService),
+        ),
+        ChangeNotifierProxyProvider<AuthService, PostService>(
+          create: (BuildContext context) => PostService(),
+          update: (BuildContext context, authService, postService) =>
+              postService.update(authService),
+        ),
+        ChangeNotifierProxyProvider<AuthService, SearchService>(
+          create: (BuildContext context) => SearchService(),
+          update: (BuildContext context, authService, searchService) =>
+              searchService.update(authService),
+        ),
+        ChangeNotifierProxyProvider<AuthService, UserService>(
+          create: (BuildContext context) => UserService(),
+          update: (BuildContext context, authService, userService) =>
+              userService.update(authService),
+        )
       ],
       child: MyApp(),
     ),
@@ -40,7 +59,6 @@ class MyApp extends StatelessWidget {
     FirebaseAnalytics analytics = FirebaseAnalytics();
     IconThemeData iconThemeData = IconThemeData(color: kPrimaryColor);
     TextTheme textThemeData = GoogleFonts.poppinsTextTheme();
-    final authService = Provider.of<AuthService>(context);
 
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
@@ -49,50 +67,30 @@ class MyApp extends StatelessWidget {
       ),
     );
 
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<FeedService>(
-          create: (BuildContext context) =>
-              FeedService(authService: authService),
-        ),
-        ChangeNotifierProvider<PostService>(
-          create: (BuildContext context) =>
-              PostService(authService: authService),
-        ),
-        ChangeNotifierProvider<SearchService>(
-          create: (BuildContext context) =>
-              SearchService(authService: authService),
-        ),
-        ChangeNotifierProvider<UserService>(
-          create: (BuildContext context) =>
-              UserService(authService: authService),
-        )
-      ],
-      child: MaterialApp(
-        initialRoute: SplashScreen.id,
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          accentColor: kPrimaryColor,
-          iconTheme: iconThemeData,
-          appBarTheme: AppBarTheme(
-            color: Colors.white,
-            brightness: Brightness.dark,
-            textTheme: textThemeData,
-            elevation: 0,
-            iconTheme: iconThemeData,
-          ),
+    return MaterialApp(
+      initialRoute: SplashScreen.id,
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        accentColor: kPrimaryColor,
+        iconTheme: iconThemeData,
+        appBarTheme: AppBarTheme(
+          color: Colors.white,
+          brightness: Brightness.dark,
           textTheme: textThemeData,
+          elevation: 0,
+          iconTheme: iconThemeData,
         ),
-        navigatorObservers: [
-          FirebaseAnalyticsObserver(analytics: analytics),
-        ],
-        routes: {
-          SplashScreen.id: (context) => SplashScreen(),
-          LoginScreen.id: (context) => LoginScreen(),
-          RegisterScreen.id: (context) => RegisterScreen(),
-          HomeScreen.id: (context) => HomeScreen(),
-        },
+        textTheme: textThemeData,
       ),
+      navigatorObservers: [
+        FirebaseAnalyticsObserver(analytics: analytics),
+      ],
+      routes: {
+        SplashScreen.id: (context) => SplashScreen(),
+        LoginScreen.id: (context) => LoginScreen(),
+        RegisterScreen.id: (context) => RegisterScreen(),
+        HomeScreen.id: (context) => HomeScreen(),
+      },
     );
   }
 }

@@ -1,13 +1,9 @@
 import 'package:app/components/profile_widget.dart';
-import 'package:app/models/error_response_model.dart';
 import 'package:app/models/user_model.dart';
 import 'package:app/services/user_service.dart';
-import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
-
-import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final UserModel user;
@@ -20,8 +16,10 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   bool loading = true;
+  bool actionLoading = false;
   UserService userService;
   UserModel user;
+  bool isFollowing = false;
 
   @override
   void didChangeDependencies() {
@@ -39,6 +37,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (user != null) {
+      isFollowing = userService.loggedInUser.isFollowing(user);
+    }
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -63,8 +65,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 ProfileWidget(user: user),
                 RaisedButton(
-                  onPressed: () {},
-                  child: Text('Follow'),
+                  onPressed: actionLoading
+                      ? null
+                      : () async {
+                          this.setState(() {
+                            actionLoading = true;
+                          });
+                          if (isFollowing) {
+                            await userService.changeFollowState(user,
+                                action: UserFollowAction.UNFOLLOW);
+                          } else {
+                            await userService.changeFollowState(user);
+                          }
+                          this.setState(() {
+                            actionLoading = false;
+                          });
+                        },
+                  child: isFollowing ? Text('Unfollow') : Text('Follow'),
                 )
               ],
             ),
