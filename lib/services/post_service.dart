@@ -1,9 +1,9 @@
 import 'dart:developer';
 
-import 'package:app/helpers/authed_request.dart';
-import 'package:app/services/auth_service.dart';
+import 'package:Moody/helpers/authed_request.dart';
+import 'package:Moody/services/auth_service.dart';
 import 'package:flutter/widgets.dart';
-import 'package:app/models/post_model.dart';
+import 'package:Moody/models/post_model.dart';
 
 class PostService extends ChangeNotifier {
   AuthService authService;

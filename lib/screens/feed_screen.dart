@@ -1,6 +1,6 @@
-import 'package:app/components/feed_widget.dart';
-import 'package:app/services/auth_service.dart';
-import 'package:app/services/feed_service.dart';
+import 'package:Moody/components/feed_widget.dart';
+import 'package:Moody/services/auth_service.dart';
+import 'package:Moody/services/feed_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

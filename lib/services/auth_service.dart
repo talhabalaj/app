@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'package:app/constants.dart';
-import 'package:app/helpers/authed_request.dart';
-import 'package:app/models/api_response_model.dart';
-import 'package:app/models/authtoken_model.dart';
-import 'package:app/models/error_response_model.dart';
-import 'package:app/models/user_model.dart';
+import 'package:Moody/constants.dart';
+import 'package:Moody/helpers/authed_request.dart';
+import 'package:Moody/models/api_response_model.dart';
+import 'package:Moody/models/authtoken_model.dart';
+import 'package:Moody/models/error_response_model.dart';
+import 'package:Moody/models/user_model.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -87,7 +87,7 @@ class AuthService extends ChangeNotifier {
     );
 
     if (res.statusCode == 201) {
-      login(userName, password);
+      await login(userName, password);
     } else {
       throw WebApiErrorResponse.fromJson(jsonDecode(res.body));
     }

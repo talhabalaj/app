@@ -1,14 +1,14 @@
-import 'package:app/components/button_seperator.dart';
-import 'package:app/components/styled_button.dart';
-import 'package:app/components/styled_textfield.dart';
-import 'package:app/constants.dart';
-import 'package:app/helpers/error_dialog.dart';
-import 'package:app/screens/home_screen.dart';
-import 'package:app/screens/login_screen.dart';
-import 'package:app/services/auth_service.dart';
+import 'package:Moody/components/button_seperator.dart';
+import 'package:Moody/components/styled_button.dart';
+import 'package:Moody/components/styled_textfield.dart';
+import 'package:Moody/constants.dart';
+import 'package:Moody/helpers/error_dialog.dart';
+import 'package:Moody/screens/home_screen.dart';
+import 'package:Moody/screens/login_screen.dart';
+import 'package:Moody/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:app/models/error_response_model.dart';
+import 'package:Moody/models/error_response_model.dart';
 
 class RegisterScreen extends StatefulWidget {
   static String id = "/register";

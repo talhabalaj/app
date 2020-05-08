@@ -1,6 +1,6 @@
-import 'package:app/helpers/random.dart';
-import 'package:app/models/comment_model.dart';
-import 'package:app/models/user_model.dart';
+import 'package:Moody/helpers/random.dart';
+import 'package:Moody/models/comment_model.dart';
+import 'package:Moody/models/user_model.dart';
 
 enum PostStateType { MEMORY, NETWORK }
 

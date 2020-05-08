@@ -1,6 +1,6 @@
-import 'package:app/models/feed_model.dart';
-import 'package:app/models/post_model.dart';
-import 'package:app/models/user_model.dart';
+import 'package:Moody/models/feed_model.dart';
+import 'package:Moody/models/post_model.dart';
+import 'package:Moody/models/user_model.dart';
 import 'package:flutter/widgets.dart';
 
 bool isSubtype<T1, T2>() => <T1>[] is List<T2>;
@@ -30,6 +30,12 @@ class WebApiSuccessResponse<T> {
         var list = data as List;
         if (json['data']['users'] != null) {
           json['data']['users'].forEach((v) => list.add(UserModel.fromJson(v)));
+        }
+      } else if (isSubtype<T, List<PostModel>>()) {
+        data = new List<PostModel>() as T;
+        var list = data as List;
+        if (json['data']['posts'] != null) {
+          json['data']['posts'].forEach((v) => list.add(PostModel.fromJson(v)));
         }
       }
     }

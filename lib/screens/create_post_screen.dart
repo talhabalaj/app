@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:app/models/post_model.dart';
-import 'package:app/services/auth_service.dart';
+import 'package:Moody/models/post_model.dart';
+import 'package:Moody/services/auth_service.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';

@@ -1,4 +1,4 @@
-import 'package:app/models/user_model.dart';
+import 'package:Moody/models/user_model.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 
@@ -40,6 +40,48 @@ class ProfileWidget extends StatelessWidget {
               fontWeight: FontWeight.w100,
               color: Colors.grey[600],
             ),
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.symmetric(vertical: 15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              FlatButton(
+                onPressed: () {},
+                disabledTextColor: Colors.grey[600],
+                child: Column(
+                  children: <Widget>[
+                    Text(
+                      user.followingCount.toString(),
+                      style:
+                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      'following',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                    )
+                  ],
+                ),
+              ),
+              FlatButton(
+                onPressed: () {},
+                disabledTextColor: Colors.grey[600],
+                child: Column(
+                  children: <Widget>[
+                    Text(
+                      user.followerCount.toString(),
+                      style:
+                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      'followers',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                    )
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ],

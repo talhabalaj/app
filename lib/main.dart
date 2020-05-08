@@ -1,13 +1,13 @@
-import 'package:app/constants.dart';
-import 'package:app/screens/home_screen.dart';
-import 'package:app/screens/login_screen.dart';
-import 'package:app/screens/register_screen.dart';
-import 'package:app/screens/splash_screen.dart';
-import 'package:app/services/auth_service.dart';
-import 'package:app/services/feed_service.dart';
-import 'package:app/services/post_service.dart';
-import 'package:app/services/search_service.dart';
-import 'package:app/services/user_service.dart';
+import 'package:Moody/constants.dart';
+import 'package:Moody/screens/home_screen.dart';
+import 'package:Moody/screens/login_screen.dart';
+import 'package:Moody/screens/register_screen.dart';
+import 'package:Moody/screens/splash_screen.dart';
+import 'package:Moody/services/auth_service.dart';
+import 'package:Moody/services/feed_service.dart';
+import 'package:Moody/services/post_service.dart';
+import 'package:Moody/services/search_service.dart';
+import 'package:Moody/services/user_service.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -58,13 +58,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     FirebaseAnalytics analytics = FirebaseAnalytics();
     IconThemeData iconThemeData = IconThemeData(color: kPrimaryColor);
-    TextTheme textThemeData = GoogleFonts.poppinsTextTheme();
+    TextTheme textThemeData = GoogleFonts.montserratTextTheme();
 
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
-        statusBarColor: Colors.white,
-        statusBarIconBrightness: Brightness.dark,
-      ),
+          statusBarColor: Colors.white,
+          statusBarIconBrightness: Brightness.dark),
     );
 
     return MaterialApp(
@@ -75,7 +74,7 @@ class MyApp extends StatelessWidget {
         iconTheme: iconThemeData,
         appBarTheme: AppBarTheme(
           color: Colors.white,
-          brightness: Brightness.dark,
+          brightness: Brightness.light,
           textTheme: textThemeData,
           elevation: 0,
           iconTheme: iconThemeData,

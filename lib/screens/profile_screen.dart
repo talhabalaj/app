@@ -1,6 +1,7 @@
-import 'package:app/components/profile_widget.dart';
-import 'package:app/models/user_model.dart';
-import 'package:app/services/user_service.dart';
+import 'package:Moody/components/post_widget.dart';
+import 'package:Moody/components/profile_widget.dart';
+import 'package:Moody/models/user_model.dart';
+import 'package:Moody/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
@@ -82,7 +83,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           });
                         },
                   child: isFollowing ? Text('Unfollow') : Text('Follow'),
-                )
+                ),
+                SizedBox(
+                  height: 30,
+                ),
+                UserPosts(user: user)
               ],
             ),
     );

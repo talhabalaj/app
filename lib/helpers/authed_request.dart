@@ -1,4 +1,4 @@
-import 'package:app/services/auth_service.dart';
+import 'package:Moody/services/auth_service.dart';
 import 'package:dio/dio.dart';
 
 import '../constants.dart';

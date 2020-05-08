@@ -1,8 +1,8 @@
-import 'package:app/components/post_widget.dart';
-import 'package:app/helpers/error_dialog.dart';
-import 'package:app/services/feed_service.dart';
+import 'package:Moody/components/post_widget.dart';
+import 'package:Moody/helpers/error_dialog.dart';
+import 'package:Moody/services/feed_service.dart';
 import 'package:flutter/material.dart';
-import 'package:app/models/error_response_model.dart';
+import 'package:Moody/models/error_response_model.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class FeedWidget extends StatefulWidget {

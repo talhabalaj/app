@@ -1,10 +1,11 @@
 import 'dart:developer';
 
-import 'package:app/helpers/authed_request.dart';
-import 'package:app/models/api_response_model.dart';
-import 'package:app/models/error_response_model.dart';
-import 'package:app/models/user_model.dart';
-import 'package:app/services/auth_service.dart';
+import 'package:Moody/helpers/authed_request.dart';
+import 'package:Moody/models/api_response_model.dart';
+import 'package:Moody/models/error_response_model.dart';
+import 'package:Moody/models/post_model.dart';
+import 'package:Moody/models/user_model.dart';
+import 'package:Moody/services/auth_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 
@@ -47,6 +48,29 @@ class UserService extends ChangeNotifier {
     }
   }
 
+  Future<List<PostModel>> getUserPosts(
+      {String userName, int offset = 0}) async {
+    Response<dynamic> res;
+
+    try {
+      res = await AuthenticatedRequest(authService: authService).request.get(
+            '/user/posts/${userName == null ? '' : userName}?offset=$offset',
+          );
+    } on DioError catch (e) {
+      if (e.type == DioErrorType.RESPONSE) {
+        res = e.response;
+      } else {
+        throw e;
+      }
+    }
+
+    if (res.statusCode == 200) {
+      return WebApiSuccessResponse<List<PostModel>>.fromJson(res.data).data;
+    } else {
+      throw WebApiErrorResponse.fromJson(res.data);
+    }
+  }
+
   Future<void> changeFollowState(UserModel user,
       {UserFollowAction action = UserFollowAction.FOLLOW}) async {
     Response<dynamic> res;
@@ -76,6 +100,7 @@ class UserService extends ChangeNotifier {
           authService.user.following.removeWhere((u) => u.sId == user.sId);
           print('removed');
         }
+        notifyListeners();
       }
     } else {
       throw WebApiErrorResponse.fromJson(res.data);

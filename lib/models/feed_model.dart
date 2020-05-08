@@ -1,4 +1,4 @@
-import 'package:app/models/post_model.dart';
+import 'package:Moody/models/post_model.dart';
 
 class FeedModel {
   List<PostModel> posts;

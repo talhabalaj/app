@@ -1,4 +1,4 @@
-import 'package:app/models/error_response_model.dart';
+import 'package:Moody/models/error_response_model.dart';
 import 'package:flutter/material.dart';
 
 import '../constants.dart';

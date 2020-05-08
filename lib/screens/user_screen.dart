@@ -1,12 +1,8 @@
-import 'package:app/components/profile_widget.dart';
-import 'package:app/models/error_response_model.dart';
-import 'package:app/services/auth_service.dart';
-import 'package:app/services/feed_service.dart';
-import 'package:app/services/post_service.dart';
-import 'package:app/services/search_service.dart';
-import 'package:app/services/user_service.dart';
+import 'package:Moody/components/post_widget.dart';
+import 'package:Moody/components/profile_widget.dart';
+import 'package:Moody/models/error_response_model.dart';
+import 'package:Moody/services/auth_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
-import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -21,6 +17,7 @@ class _UserScreenState extends State<UserScreen> {
   @override
   Widget build(BuildContext context) {
     final AuthService authService = Provider.of<AuthService>(context);
+
     if (authService.user == null) return Text('Not loading');
     return Scaffold(
       appBar: AppBar(
@@ -60,19 +57,9 @@ class _UserScreenState extends State<UserScreen> {
             onPressed: () {},
           ),
           SizedBox(
-            height: 30,
+            height: 40,
           ),
-          Expanded(
-            child: GridView.count(
-              crossAxisCount: 3,
-              childAspectRatio: 1 / 1,
-              physics: BouncingScrollPhysics(),
-              children: <Widget>[
-                ExtendedImage.network(authService.user.profilePicUrl),
-                ExtendedImage.network(authService.user.profilePicUrl),
-              ],
-            ),
-          )
+          UserPosts()
         ],
       ),
     );

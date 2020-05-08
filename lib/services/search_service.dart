@@ -1,10 +1,10 @@
 import 'dart:developer';
 
-import 'package:app/helpers/authed_request.dart';
-import 'package:app/models/api_response_model.dart';
-import 'package:app/models/error_response_model.dart';
-import 'package:app/models/user_model.dart';
-import 'package:app/services/auth_service.dart';
+import 'package:Moody/helpers/authed_request.dart';
+import 'package:Moody/models/api_response_model.dart';
+import 'package:Moody/models/error_response_model.dart';
+import 'package:Moody/models/user_model.dart';
+import 'package:Moody/services/auth_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 
