@@ -1,4 +1,5 @@
 import 'package:Moody/components/post_widget.dart';
+import 'package:Moody/components/primary_button.dart';
 import 'package:Moody/components/profile_widget.dart';
 import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/services/auth_service.dart';
@@ -14,10 +15,16 @@ class UserScreen extends StatefulWidget {
 }
 
 class _UserScreenState extends State<UserScreen> {
+  AuthService authService;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    authService = Provider.of<AuthService>(context);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final AuthService authService = Provider.of<AuthService>(context);
-
     if (authService.user == null) return Text('Not loading');
     return Scaffold(
       appBar: AppBar(
@@ -52,14 +59,16 @@ class _UserScreenState extends State<UserScreen> {
           ProfileWidget(
             user: authService.user,
           ),
-          RaisedButton(
+          PrimaryButton(
             child: Text('Edit profile'),
             onPressed: () {},
           ),
           SizedBox(
             height: 40,
           ),
-          UserPosts()
+          UserPosts(
+            user: authService.user,
+          )
         ],
       ),
     );

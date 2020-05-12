@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:Moody/components/dialogs.dart';
 import 'package:Moody/helpers/error_dialog.dart';
 import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/models/post_model.dart';
@@ -143,6 +144,8 @@ class PostTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loggedInUser = Provider.of<AuthService>(context, listen: false).user;
+
     return Container(
       decoration: BoxDecoration(
         border: BorderDirectional(
@@ -170,47 +173,32 @@ class PostTopBar extends StatelessWidget {
               Text('${post.user.userName}'),
             ],
           ),
-          PopupMenuButton<String>(
-            onSelected: (value) async {
-              if (value == 'delete') {
-                bool choice = await showDialog(
-                  context: context,
-                  child: AlertDialog(
-                    title: Text("Delete post"),
-                    content: Text("Are you sure you want to delete this post?"),
-                    actions: <Widget>[
-                      FlatButton(
-                        onPressed: () {
-                          Navigator.pop(context, true);
-                        },
-                        child: Text('Yes'),
-                      ),
-                      FlatButton(
-                        onPressed: () {
-                          Navigator.pop(context, false);
-                        },
-                        child: Text('No'),
-                      ),
-                    ],
-                  ),
-                );
-                if (choice) {
-                  try {
-                    await Provider.of<FeedService>(context, listen: false)
-                        .deletePost(post);
-                  } on WebApiErrorResponse catch (e) {
-                    showErrorDialog(context: context, e: e);
+          if (post.user.sId == loggedInUser.sId)
+            PopupMenuButton<String>(
+              onSelected: (value) async {
+                if (value == 'delete') {
+                  bool choice = await showConfirmationDialog(
+                    context: context,
+                    title: "Delete post",
+                    desc: "Are you sure you want to delete this post?",
+                  );
+                  if (choice) {
+                    try {
+                      await Provider.of<FeedService>(context, listen: false)
+                          .deletePost(post);
+                    } on WebApiErrorResponse catch (e) {
+                      showErrorDialog(context: context, e: e);
+                    }
                   }
                 }
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem<String>(
-                child: Text('Delete'),
-                value: 'delete',
-              )
-            ],
-          )
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem<String>(
+                  child: Text('Delete'),
+                  value: 'delete',
+                )
+              ],
+            )
         ],
       ),
     );

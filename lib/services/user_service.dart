@@ -95,10 +95,8 @@ class UserService extends ChangeNotifier {
       if (body['modified'] as bool) {
         if (action == UserFollowAction.FOLLOW) {
           authService.user.following.add(user);
-          print('added');
         } else {
           authService.user.following.removeWhere((u) => u.sId == user.sId);
-          print('removed');
         }
         notifyListeners();
       }

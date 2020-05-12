@@ -6,5 +6,6 @@ const kTextStyle = TextStyle(
 );
 
 const kPrimaryColor = Color(0xff03009A);
+const kPrimaryColorDark = Color(0xff141189);
 
-const kApiUrl = "http://192.168.0.108:4000";
+const kApiUrl = "https://be.talhabalaj.com";

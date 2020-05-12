@@ -41,7 +41,7 @@ class AuthService extends ChangeNotifier {
         final WebApiSuccessResponse<Map> body =
             WebApiSuccessResponse.fromJson(jsonDecode(res.body));
 
-        final token = res.headers["set-cookie"].split(";")[0].split("=")[1];
+        final token = body.data['tokenInfo']['token'] as String;
         final expiresAt = body.data['tokenInfo']['expiresAt'] as String;
         final secureStorage = FlutterSecureStorage();
         secureStorage.write(key: 'token', value: token);
