@@ -1,14 +1,18 @@
 import 'dart:typed_data';
 
+import 'package:Moody/helpers/error_dialog.dart';
+import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/models/post_model.dart';
 import 'package:Moody/models/user_model.dart';
 import 'package:Moody/screens/post_screen.dart';
 import 'package:Moody/services/auth_service.dart';
+import 'package:Moody/services/feed_service.dart';
 import 'package:Moody/services/post_service.dart';
 import 'package:Moody/services/user_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_page_transition/flutter_page_transition.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 
@@ -54,7 +58,7 @@ class _PostWidgetState extends State<PostWidget> {
       children: <Widget>[
         if (!isNetworkPost) LinearProgressIndicator(),
         PostTopBar(
-          user: widget.post.user,
+          post: widget.post,
         ),
         Container(
           decoration: BoxDecoration(
@@ -133,9 +137,9 @@ class _PostWidgetState extends State<PostWidget> {
 }
 
 class PostTopBar extends StatelessWidget {
-  const PostTopBar({Key key, this.user}) : super(key: key);
+  const PostTopBar({Key key, this.post}) : super(key: key);
 
-  final UserModel user;
+  final PostModel post;
 
   @override
   Widget build(BuildContext context) {
@@ -156,19 +160,57 @@ class PostTopBar extends StatelessWidget {
             children: <Widget>[
               CircleAvatar(
                 backgroundImage: ExtendedNetworkImageProvider(
-                  user.profilePicUrl,
+                  post.user.profilePicUrl,
                   cache: true,
                 ),
               ),
               SizedBox(
                 width: 10,
               ),
-              Text('${user.userName}'),
+              Text('${post.user.userName}'),
             ],
           ),
-          // PopupMenuButton(itemBuilder: (context) {
-          //   PopupMenuEntry();
-          // },)
+          PopupMenuButton<String>(
+            onSelected: (value) async {
+              if (value == 'delete') {
+                bool choice = await showDialog(
+                  context: context,
+                  child: AlertDialog(
+                    title: Text("Delete post"),
+                    content: Text("Are you sure you want to delete this post?"),
+                    actions: <Widget>[
+                      FlatButton(
+                        onPressed: () {
+                          Navigator.pop(context, true);
+                        },
+                        child: Text('Yes'),
+                      ),
+                      FlatButton(
+                        onPressed: () {
+                          Navigator.pop(context, false);
+                        },
+                        child: Text('No'),
+                      ),
+                    ],
+                  ),
+                );
+                if (choice) {
+                  try {
+                    await Provider.of<FeedService>(context, listen: false)
+                        .deletePost(post);
+                  } on WebApiErrorResponse catch (e) {
+                    showErrorDialog(context: context, e: e);
+                  }
+                }
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem<String>(
+                child: Text('Delete'),
+                value: 'delete',
+              )
+            ],
+          )
         ],
       ),
     );
@@ -271,7 +313,11 @@ class _UserPostsState extends State<UserPosts> {
               color: Colors.grey[100],
               child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3, childAspectRatio: 1 / 1),
+                    crossAxisCount: 3,
+                    childAspectRatio: 1 / 1,
+                    mainAxisSpacing: 2,
+                    crossAxisSpacing: 2,
+                  ),
                   itemCount: userPosts.length + 1,
                   physics: BouncingScrollPhysics(),
                   itemBuilder: (context, index) {
@@ -279,9 +325,9 @@ class _UserPostsState extends State<UserPosts> {
                       return GestureDetector(
                         onTap: () {
                           Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  PostScreen(post: userPosts[index]),
+                            PageTransition(
+                              type: PageTransitionType.transferUp,
+                              child: PostScreen(post: userPosts[index]),
                             ),
                           );
                         },

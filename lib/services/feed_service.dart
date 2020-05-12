@@ -98,6 +98,33 @@ class FeedService extends ChangeNotifier {
     return this;
   }
 
+  Future<void> deletePost(PostModel post) async {
+    Response<dynamic> res;
+
+    try {
+      res = await AuthenticatedRequest(authService: this.authService)
+          .request
+          .delete(
+            '/post/${post.sId}',
+          );
+    } on DioError catch (e) {
+      if (e.type == DioErrorType.RESPONSE) {
+        res = e.response;
+      } else {
+        throw e;
+      }
+    }
+
+    if (res.statusCode == 200) {
+      feed.posts.removeWhere((p) => p.sId == post.sId);
+
+      //     WebApiSuccessResponse<PostModel>.fromJson(res.data).data;
+      notifyListeners();
+    } else {
+      throw WebApiErrorResponse.fromJson(res.data);
+    }
+  }
+
   Future<void> createPost(PostModel newPost) async {
     FormData formData = new FormData.fromMap({
       "caption": newPost.caption,

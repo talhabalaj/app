@@ -15,7 +15,10 @@ class AuthenticatedRequest {
       _headers = Map<String, String>();
     }
 
-    _headers['Cookie'] = 'access_token=${authService.auth.token}';
+    bool isSecure = kApiUrl.split("://")[0] == 'https';
+
+    _headers['Cookie'] =
+        'access_token=${authService.auth.token}; HttpOnly; ${isSecure ? 'Secure' : ''}';
     request = Dio(
       BaseOptions(
         baseUrl: kApiUrl,
