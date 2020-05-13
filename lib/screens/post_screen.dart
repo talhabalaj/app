@@ -18,8 +18,11 @@ class _PostScreenState extends State<PostScreen> {
       appBar: AppBar(
         title: Text("Post"),
       ),
-      body: PostWidget(
-        post: widget.post,
+      body: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
+        child: PostWidget(
+          post: widget.post,
+        ),
       ),
     );
   }

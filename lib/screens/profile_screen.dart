@@ -1,7 +1,6 @@
 import 'package:Moody/components/post_widget.dart';
 import 'package:Moody/components/primary_button.dart';
 import 'package:Moody/components/profile_widget.dart';
-import 'package:Moody/constants.dart';
 import 'package:Moody/models/user_model.dart';
 import 'package:Moody/services/user_service.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +31,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> getProfile() async {
-    user = await userService.getUserProfile(widget.user.userName);
+    user = await userService.getUserProfile(widget.user.sId);
 
     this.setState(() {
       loading = false;
@@ -65,27 +64,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ],
             )
-          : Column(
+          : ListView(
+              physics: BouncingScrollPhysics(),
               children: [
                 ProfileWidget(user: user),
-                PrimaryButton(
-                    child: isFollowing ? Text('Unfollow') : Text('Follow'),
-                    onPressed: actionLoading
-                        ? null
-                        : () async {
-                            this.setState(() {
-                              actionLoading = true;
-                            });
-                            if (isFollowing) {
-                              await userService.changeFollowState(user,
-                                  action: UserFollowAction.UNFOLLOW);
-                            } else {
-                              await userService.changeFollowState(user);
-                            }
-                            this.setState(() {
-                              actionLoading = false;
-                            });
-                          }),
+                Center(
+                  child: PrimaryButton(
+                      child: isFollowing ? Text('Unfollow') : Text('Follow'),
+                      onPressed: actionLoading
+                          ? null
+                          : () async {
+                              this.setState(() {
+                                actionLoading = true;
+                              });
+                              if (isFollowing) {
+                                await userService.changeFollowState(user,
+                                    action: UserFollowAction.UNFOLLOW);
+                              } else {
+                                await userService.changeFollowState(user);
+                              }
+                              this.setState(() {
+                                actionLoading = false;
+                              });
+                            }),
+                ),
                 SizedBox(
                   height: 30,
                 ),

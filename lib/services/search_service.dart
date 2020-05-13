@@ -1,8 +1,6 @@
 import 'dart:developer';
 
 import 'package:Moody/helpers/authed_request.dart';
-import 'package:Moody/models/api_response_model.dart';
-import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/models/user_model.dart';
 import 'package:Moody/services/auth_service.dart';
 import 'package:dio/dio.dart';
@@ -13,10 +11,9 @@ class SearchService extends ChangeNotifier {
 
   String searchTerm = '';
   List<UserModel> list = new List<UserModel>();
-
   bool loading = false;
-
   CancelToken cancelToken;
+  String error;
 
   SearchService();
 
@@ -32,19 +29,20 @@ class SearchService extends ChangeNotifier {
     searchTerm = '';
     list = new List<UserModel>();
     loading = false;
+    error = '';
     cancelToken = null;
     notifyListeners();
   }
 
   Future<void> search(String query) async {
+    error = '';
+
     if (query == '') {
       searchTerm = '';
       list.removeRange(0, list.length);
       notifyListeners();
       return;
     }
-
-    Response<dynamic> res;
 
     searchTerm = query;
     this.loading = true;
@@ -57,24 +55,24 @@ class SearchService extends ChangeNotifier {
     cancelToken = new CancelToken();
 
     try {
-      res = await AuthenticatedRequest(authService: authService)
-          .request
-          .get('/user/search?q=$query', cancelToken: cancelToken);
-    } on DioError catch (e) {
-      if (e.type == DioErrorType.RESPONSE) {
-        res = e.response;
-      } else {
-        throw e;
+      final res = await ApiRequest(
+        authService: authService,
+      ).request<List<UserModel>>(
+        '/user/search?q=$query',
+        method: HttpRequestMethod.GET,
+        cancelToken: cancelToken,
+      );
+
+      if (res != null) {
+        list = res.data;
+        this.loading = false;
       }
+    } catch (e) {
+      this.loading = false;
+      this.error = e.toString();
     }
 
-    if (res.statusCode == 200) {
-      list = WebApiSuccessResponse<List<UserModel>>.fromJson(res.data).data;
-      this.loading = false;
-      notifyListeners();
-    } else {
-      throw WebApiErrorResponse.fromJson(res.data);
-    }
+    notifyListeners();
   }
 
   @override

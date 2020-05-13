@@ -15,9 +15,8 @@ class PostService extends ChangeNotifier {
       post.likes.add(authService.user.sId);
       notifyListeners();
       try {
-        await AuthenticatedRequest(authService: authService)
-            .request
-            .get('/post/${post.sId}/like');
+        await ApiRequest(authService: authService)
+            .request('/post/${post.sId}/like', method: HttpRequestMethod.GET);
       } catch (e) {
         post.likes.remove(authService.user);
         notifyListeners();
@@ -30,9 +29,8 @@ class PostService extends ChangeNotifier {
       post.likes.remove(authService.user.sId);
       notifyListeners();
       try {
-        await AuthenticatedRequest(authService: authService)
-            .request
-            .get('/post/${post.sId}/unlike');
+        await ApiRequest(authService: authService)
+            .request('/post/${post.sId}/unlike', method: HttpRequestMethod.GET);
       } catch (e) {
         post.likes.add(authService.user.sId);
         notifyListeners();

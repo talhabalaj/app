@@ -23,7 +23,9 @@ class _FeedScreenState extends State<FeedScreen> {
         centerTitle: true,
         automaticallyImplyLeading: false,
         shape: RoundedRectangleBorder(
-          side: BorderSide(color: Colors.grey[300]),
+          side: BorderSide(
+            color: Colors.grey[300],
+          ),
         ),
       ),
       body: Consumer<FeedService>(

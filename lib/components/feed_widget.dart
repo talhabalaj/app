@@ -1,5 +1,5 @@
 import 'package:Moody/components/post_widget.dart';
-import 'package:Moody/helpers/error_dialog.dart';
+import 'package:Moody/helpers/dialogs.dart';
 import 'package:Moody/services/feed_service.dart';
 import 'package:flutter/material.dart';
 import 'package:Moody/models/error_response_model.dart';
@@ -27,7 +27,7 @@ class _FeedWidgetState extends State<FeedWidget> {
   Future<void> refreshFeed() async {
     try {
       await feedService.refreshFeed();
-    } on WebApiErrorResponse catch (e) {
+    } on WebErrorResponse catch (e) {
       showErrorDialog(context: context, e: e);
     } catch (e) {
       print(e);
@@ -37,7 +37,7 @@ class _FeedWidgetState extends State<FeedWidget> {
   Future<void> initFeed() async {
     try {
       await feedService.initFeed();
-    } on WebApiErrorResponse catch (e) {
+    } on WebErrorResponse catch (e) {
       showErrorDialog(context: context, e: e);
     } catch (e) {
       print(e);
@@ -47,7 +47,7 @@ class _FeedWidgetState extends State<FeedWidget> {
   @override
   Widget build(BuildContext context) {
     if (feedService.feed == null)
-      return SpinKitChasingDots(
+      return SpinKitRotatingPlain(
         color: Theme.of(context).accentColor,
       );
 

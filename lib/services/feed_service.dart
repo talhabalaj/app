@@ -1,8 +1,6 @@
 import 'dart:developer';
 
 import 'package:Moody/helpers/authed_request.dart';
-import 'package:Moody/models/api_response_model.dart';
-import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/models/feed_model.dart';
 import 'package:Moody/models/post_model.dart';
 import 'package:Moody/services/auth_service.dart';
@@ -17,74 +15,34 @@ class FeedService extends ChangeNotifier {
 
   FeedModel get feed => _feed;
 
-  Future<Response<dynamic>> requestFeed(
-      {int offset = 0, int limit = 10}) async {
-    Response<dynamic> res;
-
+  Future<FeedModel> requestFeed({int offset = 0, int limit = 10}) async {
     if (loading) {
       loading = true;
       notifyListeners();
     }
 
-    try {
-      res = await AuthenticatedRequest(authService: this.authService)
-          .request
-          .get('/feed?offset=$offset&limit=$limit');
-    } on DioError catch (e) {
-      if (e.type == DioErrorType.RESPONSE) {
-        res = e.response;
-      } else {
-        throw e;
-      }
-    }
+    final res = await ApiRequest(authService: this.authService)
+        .request<FeedModel>('/feed?offset=$offset&limit=$limit');
 
     loading = false;
     notifyListeners();
 
-    return res;
+    return res.data;
   }
 
   Future<void> initFeed() async {
-    Response<dynamic> res = await requestFeed();
-
-    if (res != null) {
-      if (res.statusCode == 200) {
-        _feed = WebApiSuccessResponse<FeedModel>.fromJson(res.data).data;
-        notifyListeners();
-      } else {
-        throw WebApiErrorResponse.fromJson(res.data);
-      }
-    }
+    _feed = await requestFeed();
+    notifyListeners();
   }
 
   Future<void> refreshFeed() async {
-    Response<dynamic> res = await requestFeed(limit: 20);
-
-    if (res != null) {
-      if (res.statusCode == 200) {
-        FeedModel lastestFeed =
-            WebApiSuccessResponse<FeedModel>.fromJson(res.data).data;
-        _feed = lastestFeed;
-        notifyListeners();
-      } else {
-        throw WebApiErrorResponse.fromJson(res.data);
-      }
-    }
+    _feed = await requestFeed(limit: 20);
+    notifyListeners();
   }
 
   Future<void> getOldPost() async {
-    Response<dynamic> res = await requestFeed(offset: _feed.posts.length);
-
-    if (res != null) {
-      if (res.statusCode == 200) {
-        FeedModel oldFeed =
-            WebApiSuccessResponse<FeedModel>.fromJson(res.data).data;
-        _feed.posts.addAll(oldFeed.posts);
-        notifyListeners();
-      } else {
-        throw WebApiErrorResponse.fromJson(res.data);
-      }
-    }
+    _feed.posts.addAll((await requestFeed(offset: _feed.posts.length)).posts);
+    notifyListeners();
   }
 
   FeedService update(AuthService authService) {
@@ -99,30 +57,11 @@ class FeedService extends ChangeNotifier {
   }
 
   Future<void> deletePost(PostModel post) async {
-    Response<dynamic> res;
+    await ApiRequest(authService: this.authService)
+        .request('/post/${post.sId}', method: HttpRequestMethod.DELETE);
 
-    try {
-      res = await AuthenticatedRequest(authService: this.authService)
-          .request
-          .delete(
-            '/post/${post.sId}',
-          );
-    } on DioError catch (e) {
-      if (e.type == DioErrorType.RESPONSE) {
-        res = e.response;
-      } else {
-        throw e;
-      }
-    }
-
-    if (res.statusCode == 200) {
-      feed.posts.removeWhere((p) => p.sId == post.sId);
-
-      //     WebApiSuccessResponse<PostModel>.fromJson(res.data).data;
-      notifyListeners();
-    } else {
-      throw WebApiErrorResponse.fromJson(res.data);
-    }
+    feed.posts.removeWhere((p) => p.sId == post.sId);
+    notifyListeners();
   }
 
   Future<void> createPost(PostModel newPost) async {
@@ -135,33 +74,20 @@ class FeedService extends ChangeNotifier {
       ),
     });
 
-    Response<dynamic> res;
     feed.posts.insert(0, newPost);
     notifyListeners();
 
-    try {
-      res = await AuthenticatedRequest(authService: this.authService)
-          .request
-          .post(
-            '/post/create',
-            data: formData,
-          );
-    } on DioError catch (e) {
-      if (e.type == DioErrorType.RESPONSE) {
-        res = e.response;
-      } else {
-        throw e;
-      }
-    }
+    final res =
+        await ApiRequest(authService: this.authService).request<PostModel>(
+      '/post/create',
+      method: HttpRequestMethod.POST,
+      data: formData,
+    );
 
-    if (res.statusCode == 200) {
-      int index = feed.posts.indexWhere((post) => post.sId == newPost.sId);
-      feed.posts[index] =
-          WebApiSuccessResponse<PostModel>.fromJson(res.data).data;
-      notifyListeners();
-    } else {
-      throw WebApiErrorResponse.fromJson(res.data);
-    }
+    int index = feed.posts.indexWhere((post) => post.sId == newPost.sId);
+    feed.posts[index] = res.data;
+
+    notifyListeners();
   }
 
   @override

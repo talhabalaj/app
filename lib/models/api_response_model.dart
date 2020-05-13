@@ -5,15 +5,15 @@ import 'package:flutter/widgets.dart';
 
 bool isSubtype<T1, T2>() => <T1>[] is List<T2>;
 
-class WebApiSuccessResponse<T> {
+class WebResponse<T> {
   String message;
   int status;
   T data;
 
-  WebApiSuccessResponse.withData(
+  WebResponse.withData(
       {@required this.status, @required this.message, this.data});
 
-  WebApiSuccessResponse.fromJson(Map<String, dynamic> json) {
+  WebResponse.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
     if (json['data'] != null) {
@@ -37,6 +37,8 @@ class WebApiSuccessResponse<T> {
         if (json['data']['posts'] != null) {
           json['data']['posts'].forEach((v) => list.add(PostModel.fromJson(v)));
         }
+      } else {
+        data = new Map<String, dynamic>() as T;
       }
     }
   }

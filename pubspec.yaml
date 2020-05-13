@@ -39,6 +39,8 @@ dependencies:
   eva_icons_flutter: ^2.0.0
   google_fonts: ^1.0.0
   flutter_page_transition: ^0.1.6
+  toast: ^0.1.5
+  simple_moment: ^1.0.4
 
 dev_dependencies:
   flutter_test:

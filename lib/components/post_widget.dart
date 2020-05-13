@@ -1,11 +1,12 @@
 import 'dart:typed_data';
 
-import 'package:Moody/components/dialogs.dart';
-import 'package:Moody/helpers/error_dialog.dart';
+import 'package:Moody/helpers/dialogs.dart';
 import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/models/post_model.dart';
 import 'package:Moody/models/user_model.dart';
+import 'package:Moody/screens/people_list_screen.dart';
 import 'package:Moody/screens/post_screen.dart';
+import 'package:Moody/screens/profile_screen.dart';
 import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/feed_service.dart';
 import 'package:Moody/services/post_service.dart';
@@ -16,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_page_transition/flutter_page_transition.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
+import 'package:simple_moment/simple_moment.dart';
 
 class PostWidget extends StatefulWidget {
   final PostModel post;
@@ -159,19 +161,31 @@ class PostTopBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              CircleAvatar(
-                backgroundImage: ExtendedNetworkImageProvider(
-                  post.user.profilePicUrl,
-                  cache: true,
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                PageTransition(
+                  type: PageTransitionType.transferRight,
+                  child: ProfileScreen(
+                    user: post.user,
+                  ),
                 ),
-              ),
-              SizedBox(
-                width: 10,
-              ),
-              Text('${post.user.userName}'),
-            ],
+              );
+            },
+            child: Row(
+              children: <Widget>[
+                CircleAvatar(
+                  backgroundImage: ExtendedNetworkImageProvider(
+                    post.user.profilePicUrl,
+                    cache: true,
+                  ),
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Text('${post.user.userName}'),
+              ],
+            ),
           ),
           if (post.user.sId == loggedInUser.sId)
             PopupMenuButton<String>(
@@ -186,7 +200,7 @@ class PostTopBar extends StatelessWidget {
                     try {
                       await Provider.of<FeedService>(context, listen: false)
                           .deletePost(post);
-                    } on WebApiErrorResponse catch (e) {
+                    } on WebErrorResponse catch (e) {
                       showErrorDialog(context: context, e: e);
                     }
                   }
@@ -210,6 +224,64 @@ class PostBottomDetails extends StatelessWidget {
 
   final PostModel post;
 
+  Widget getLikesDescription(context) {
+    final loggedInUser = Provider.of<AuthService>(context, listen: false).user;
+    final knownLikers = loggedInUser.following
+        .where((f) => post.likes.indexOf(f.sId) != -1)
+        .toList()
+          ..shuffle();
+    final textStyle = TextStyle(fontWeight: FontWeight.bold);
+    Widget likeWidget = Text('${post.likes.length} likes', style: textStyle);
+
+    if (knownLikers.length > 0) {
+      List<Widget> likeWidgetList = [
+        Padding(
+          padding: const EdgeInsets.only(right: 5),
+          child: CircleAvatar(
+            radius: 10,
+            backgroundImage:
+                ExtendedNetworkImageProvider(knownLikers[0].profilePicUrl),
+          ),
+        ),
+        Text(
+          'Liked by ',
+          style: textStyle,
+        ),
+        Text(knownLikers[0].userName, style: textStyle),
+      ];
+      if (post.likes.length - 1 > 0)
+        likeWidgetList.add(
+          Text(
+            ' and ${post.likes.length - 1} others',
+            style: textStyle,
+          ),
+        );
+
+      likeWidget = Row(
+        children: likeWidgetList,
+      );
+    }
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          PageTransition(
+            child: PeopleListScreen(
+              list: post.likes,
+              listTitle: "Likers",
+            ),
+            type: PageTransitionType.transferRight,
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: likeWidget,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -217,10 +289,7 @@ class PostBottomDetails extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            '${post.likes.length} likes',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
+          getLikesDescription(context),
           if (post.caption != '')
             Text.rich(
               TextSpan(
@@ -234,12 +303,18 @@ class PostBottomDetails extends StatelessWidget {
                 ],
               ),
             ),
-          // if (post.createdAt != null)
-          //   Text(DateTime.parse(post.createdAt)
-          //           .difference(DateTime.now())
-          //           .inMinutes
-          //           .toString() +
-          //       ' minutes ago')
+          if (post.createdAt != null)
+            Text(
+              Moment.fromDate(
+                DateTime.now(),
+              ).from(
+                DateTime.parse(post.createdAt),
+              ),
+              style: TextStyle(
+                color: Colors.grey[500],
+                fontSize: 12,
+              ),
+            )
         ],
       ),
     );
@@ -265,9 +340,7 @@ class _UserPostsState extends State<UserPosts> {
     if (widget.user == null)
       return this.userService.getUserPosts(offset: offset);
     else
-      return this
-          .userService
-          .getUserPosts(userName: widget.user.userName, offset: offset);
+      return this.userService.getUserPosts(id: widget.user.sId, offset: offset);
   }
 
   @override
@@ -296,62 +369,47 @@ class _UserPostsState extends State<UserPosts> {
         ? SpinKitChasingDots(
             color: Theme.of(context).accentColor,
           )
-        : Expanded(
-            child: Container(
-              color: Colors.grey[100],
-              child: GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    childAspectRatio: 1 / 1,
-                    mainAxisSpacing: 2,
-                    crossAxisSpacing: 2,
-                  ),
-                  itemCount: userPosts.length + 1,
-                  physics: BouncingScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    if (index < userPosts.length) {
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            PageTransition(
-                              type: PageTransitionType.transferUp,
-                              child: PostScreen(post: userPosts[index]),
-                            ),
-                          );
-                        },
-                        child: ExtendedImage.network(
-                          userPosts[index].imageUrl,
-                          cache: true,
+        : Container(
+            color: Colors.grey[100],
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                childAspectRatio: 1 / 1,
+                mainAxisSpacing: 2,
+                crossAxisSpacing: 2,
+              ),
+              shrinkWrap: true,
+              itemCount: userPosts.length + 1,
+              physics: BouncingScrollPhysics(),
+              itemBuilder: (context, index) {
+                if (index < userPosts.length) {
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        PageTransition(
+                          type: PageTransitionType.transferUp,
+                          child: PostScreen(post: userPosts[index]),
                         ),
                       );
-                    } else {
-                      if (lastIndexFetched < index) {
-                        lastIndexFetched = index + 1;
+                    },
+                    child: ExtendedImage.network(
+                      userPosts[index].imageUrl,
+                      cache: true,
+                    ),
+                  );
+                } else {
+                  if (lastIndexFetched < index) {
+                    lastIndexFetched = index + 1;
 
-                        getUserPosts(offset: userPosts.length).then((value) {
-                          this.setState(() {
-                            userPosts.addAll(value);
-                          });
-                        });
-
-                        return SpinKitChasingDots(
-                          color: Theme.of(context).accentColor,
-                        );
-                      }
-                    }
-                  }),
+                    getUserPosts(offset: userPosts.length).then((value) {
+                      this.setState(() {
+                        userPosts.addAll(value);
+                      });
+                    });
+                  }
+                }
+              },
             ),
           );
   }
 }
-
-// GridView.count(
-//               crossAxisCount: 3,
-
-//               childAspectRatio: 1 / 1,
-//               physics: BouncingScrollPhysics(),
-//               children: <Widget>[
-//                 for (PostModel post in userPosts)
-//
-//               ],
-//             ),

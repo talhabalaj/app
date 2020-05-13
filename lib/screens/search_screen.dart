@@ -1,13 +1,13 @@
-import 'package:Moody/helpers/error_dialog.dart';
+import 'package:Moody/helpers/dialogs.dart';
 import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/models/user_model.dart';
 import 'package:Moody/screens/profile_screen.dart';
-import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/search_service.dart';
 import 'package:dio/dio.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_page_transition/flutter_page_transition.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 
@@ -51,7 +51,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   if (searchService.list.length > 0)
                     ...searchService.list
                         .map(
-                          (user) => UserSearchResult(
+                          (user) => UserListItem(
                             user: user,
                           ),
                         )
@@ -88,7 +88,7 @@ class SearchField extends StatelessWidget {
       onChanged: (value) async {
         try {
           await searchService.search(value);
-        } on WebApiErrorResponse catch (e) {
+        } on WebErrorResponse catch (e) {
           showErrorDialog(context: context, e: e);
         } on DioError catch (e) {
           if (e.type != DioErrorType.CANCEL) {
@@ -125,12 +125,14 @@ class SearchField extends StatelessWidget {
   }
 }
 
-class UserSearchResult extends StatelessWidget {
-  const UserSearchResult({
+class UserListItem extends StatelessWidget {
+  const UserListItem({
     Key key,
     @required this.user,
+    this.chevron = true,
   }) : super(key: key);
 
+  final bool chevron;
   final UserModel user;
 
   @override
@@ -140,7 +142,10 @@ class UserSearchResult extends StatelessWidget {
         FocusScope.of(context).unfocus();
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ProfileScreen(user: user)),
+          PageTransition(
+            child: ProfileScreen(user: user),
+            type: PageTransitionType.transferRight,
+          ),
         );
       },
       padding: EdgeInsets.symmetric(horizontal: 18, vertical: 10),
@@ -173,7 +178,7 @@ class UserSearchResult extends StatelessWidget {
               )
             ],
           ),
-          Icon(EvaIcons.chevronRight),
+          if (chevron) Icon(EvaIcons.chevronRight),
         ],
       ),
     );

@@ -4,7 +4,7 @@ import 'package:Moody/components/button_seperator.dart';
 import 'package:Moody/components/styled_button.dart';
 import 'package:Moody/components/styled_textfield.dart';
 import 'package:Moody/constants.dart';
-import 'package:Moody/helpers/error_dialog.dart';
+import 'package:Moody/helpers/dialogs.dart';
 import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/screens/register_screen.dart';
 import 'package:Moody/services/auth_service.dart';
@@ -81,7 +81,7 @@ class _LoginFormState extends State<LoginForm> {
         await auth.login(userName, password);
         _formkey.currentState.reset();
         Navigator.of(context).popAndPushNamed(HomeScreen.id);
-      } on WebApiErrorResponse catch (e) {
+      } on WebErrorResponse catch (e) {
         showErrorDialog(context: context, e: e);
       } on SocketException catch (e) {
         Scaffold.of(context).showSnackBar(

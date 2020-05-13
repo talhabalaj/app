@@ -47,24 +47,27 @@ class _UserScreenState extends State<UserScreen> {
                   Navigator.of(context).pushNamedAndRemoveUntil(
                       LoginScreen.id, (Route<dynamic> route) => false);
                   await authService.logout();
-                } on WebApiErrorResponse catch (e) {
+                } on WebErrorResponse catch (e) {
                   print(e.message);
                 }
               },
             ),
         ],
       ),
-      body: Column(
+      body: ListView(
+        physics: BouncingScrollPhysics(),
         children: [
           ProfileWidget(
             user: authService.user,
           ),
-          PrimaryButton(
-            child: Text('Edit profile'),
-            onPressed: () {},
+          Center(
+            child: PrimaryButton(
+              child: Text('Edit profile'),
+              onPressed: null,
+            ),
           ),
           SizedBox(
-            height: 40,
+            height: 25,
           ),
           UserPosts(
             user: authService.user,

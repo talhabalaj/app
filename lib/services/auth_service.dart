@@ -38,8 +38,8 @@ class AuthService extends ChangeNotifier {
 
     if (res != null) {
       if (res.statusCode == 202) {
-        final WebApiSuccessResponse<Map> body =
-            WebApiSuccessResponse.fromJson(jsonDecode(res.body));
+        final WebResponse<Map> body =
+            WebResponse.fromJson(jsonDecode(res.body));
 
         final token = body.data['tokenInfo']['token'] as String;
         final expiresAt = body.data['tokenInfo']['expiresAt'] as String;
@@ -52,16 +52,12 @@ class AuthService extends ChangeNotifier {
           expiresAt: DateTime.parse(expiresAt),
         );
 
-        final resUser = WebApiSuccessResponse<UserModel>.fromJson(
-          (await AuthenticatedRequest(authService: this)
-                  .request
-                  .get('/user/profile'))
-              .data,
-        );
-        user = resUser.data;
+        user =
+            (await ApiRequest(authService: this).request<UserModel>('/user/profile')).data;
+
         notifyListeners();
       } else {
-        throw WebApiErrorResponse.fromJson(jsonDecode(res.body));
+        throw WebErrorResponse.fromJson(jsonDecode(res.body));
       }
     }
   }
@@ -86,11 +82,7 @@ class AuthService extends ChangeNotifier {
       }),
     );
 
-    if (res.statusCode == 201) {
-      await login(userName, password);
-    } else {
-      throw WebApiErrorResponse.fromJson(jsonDecode(res.body));
-    }
+    await login(userName, password);
   }
 
   Future<void> logout() async {
@@ -99,7 +91,7 @@ class AuthService extends ChangeNotifier {
     }
 
     try {
-      await AuthenticatedRequest(authService: this).request.get('/user/logout');
+      await ApiRequest(authService: this).request('/user/logout');
     } catch (e) {
       print("Logout was't preformed on server side.");
     }
@@ -114,14 +106,14 @@ class AuthService extends ChangeNotifier {
     final data = await secureStorage.readAll();
     if (data['token'] != null) {
       auth = AuthTokenModel(
-          token: data['token'], expiresAt: DateTime.parse(data['expiresAt']));
-      final res = WebApiSuccessResponse<UserModel>.fromJson(
-        (await AuthenticatedRequest(authService: this)
-                .request
-                .get('/user/profile'))
-            .data,
+        token: data['token'],
+        expiresAt: DateTime.parse(
+          data['expiresAt'],
+        ),
       );
-      user = res.data;
+
+      user =
+          (await ApiRequest(authService: this).request<UserModel>('/user/profile')).data;
     } else {
       throw AuthServiceError("Not logged in");
     }

@@ -1,8 +1,9 @@
-import 'package:Moody/helpers/error_dialog.dart';
+import 'package:Moody/helpers/dialogs.dart';
 import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/models/post_model.dart';
 import 'package:Moody/screens/create_post_screen.dart';
 import 'package:Moody/screens/feed_screen.dart';
+import 'package:Moody/screens/notification_screen.dart';
 import 'package:Moody/screens/search_screen.dart';
 import 'package:Moody/screens/user_screen.dart';
 import 'package:Moody/services/feed_service.dart';
@@ -22,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Widget> tabs = [
     FeedScreen(),
     SearchScreen(),
-    Text("Notifications"),
+    NotificationScreen(),
     UserScreen(),
   ];
 
@@ -51,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 try {
                   await Provider.of<FeedService>(context, listen: false)
                       .createPost(createPost);
-                } on WebApiErrorResponse catch (e) {
+                } on WebErrorResponse catch (e) {
                   showErrorDialog(context: context, e: e);
                 }
               }
