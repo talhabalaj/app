@@ -5,6 +5,7 @@ import 'package:Moody/screens/register_screen.dart';
 import 'package:Moody/screens/splash_screen.dart';
 import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/feed_service.dart';
+import 'package:Moody/services/notification_service.dart';
 import 'package:Moody/services/post_service.dart';
 import 'package:Moody/services/search_service.dart';
 import 'package:Moody/services/user_service.dart';
@@ -46,6 +47,11 @@ void main() {
           create: (BuildContext context) => UserService(),
           update: (BuildContext context, authService, userService) =>
               userService.update(authService),
+        ),
+        ChangeNotifierProxyProvider<AuthService, NotificationService>(
+          create: (BuildContext context) => NotificationService(),
+          update: (BuildContext context, authService, notificationService) =>
+              notificationService.update(authService),
         )
       ],
       child: MyApp(),

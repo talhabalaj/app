@@ -47,7 +47,7 @@ class _FeedWidgetState extends State<FeedWidget> {
   @override
   Widget build(BuildContext context) {
     if (feedService.feed == null)
-      return SpinKitRotatingPlain(
+      return SpinKitRing(
         color: Theme.of(context).accentColor,
       );
 
@@ -68,14 +68,14 @@ class _FeedWidgetState extends State<FeedWidget> {
             if (indexRequested < index && feed.posts.length != 0) {
               feedService.getOldPost();
               indexRequested = index + 1;
-              return SpinKitChasingDots(
+              return SpinKitRing(
                 color: Theme.of(context).accentColor,
               );
             }
 
             if (feed.posts.length == 0 && index == 0) {
               final child = feedService.loading
-                  ? SpinKitChasingDots(
+                  ? SpinKitRing(
                       color: Theme.of(context).accentColor,
                     )
                   : Text(

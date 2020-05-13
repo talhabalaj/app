@@ -34,7 +34,7 @@ class UserService extends ChangeNotifier {
   Future<List<PostModel>> getUserPosts({String id, int offset = 0}) async {
     final res =
         await ApiRequest(authService: authService).request<List<PostModel>>(
-      '/user/posts/${id == null ? '' : id}?offset=$offset',
+      '/user/${id == null ? '' : '$id/'}posts?offset=$offset',
     );
 
     return res.data;

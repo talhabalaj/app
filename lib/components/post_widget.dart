@@ -350,12 +350,12 @@ class _UserPostsState extends State<UserPosts> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
         List<PostModel> posts = await getUserPosts();
-
-        this.setState(() {
-          userPosts = posts;
-          postsLoading = false;
-          lastIndexFetched = 0;
-        });
+        if (this.mounted)
+          this.setState(() {
+            userPosts = posts;
+            postsLoading = false;
+            lastIndexFetched = 0;
+          });
       } catch (e) {
         print(e);
       }
@@ -366,7 +366,7 @@ class _UserPostsState extends State<UserPosts> {
   @override
   Widget build(BuildContext context) {
     return postsLoading
-        ? SpinKitChasingDots(
+        ? SpinKitRing(
             color: Theme.of(context).accentColor,
           )
         : Container(
@@ -402,9 +402,10 @@ class _UserPostsState extends State<UserPosts> {
                     lastIndexFetched = index + 1;
 
                     getUserPosts(offset: userPosts.length).then((value) {
-                      this.setState(() {
-                        userPosts.addAll(value);
-                      });
+                      if (this.mounted)
+                        this.setState(() {
+                          userPosts.addAll(value);
+                        });
                     });
                   }
                 }

@@ -62,8 +62,10 @@ class _UserScreenState extends State<UserScreen> {
           ),
           Center(
             child: PrimaryButton(
-              child: Text('Edit profile'),
-              onPressed: null,
+              onPressed: () {
+                
+              },
+              child: Text('Edit Profile'),
             ),
           ),
           SizedBox(

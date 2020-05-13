@@ -1,6 +1,10 @@
+import 'package:Moody/components/primary_button.dart';
 import 'package:Moody/models/user_model.dart';
+import 'package:Moody/screens/people_list_screen.dart';
+import 'package:Moody/services/auth_service.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_page_transition/flutter_page_transition.dart';
 
 class ProfileWidget extends StatelessWidget {
   final UserModel user;
@@ -48,12 +52,22 @@ class ProfileWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               FlatButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.of(context).push(
+                    PageTransition(
+                      type: PageTransitionType.transferRight,
+                      child: PeopleListScreen(
+                        listTitle: 'Following',
+                        list: user.following.map((e) => e.sId).toList(),
+                      ),
+                    ),
+                  );
+                },
                 disabledTextColor: Colors.grey[600],
                 child: Column(
                   children: <Widget>[
                     Text(
-                      user.followingCount.toString(),
+                      user.following.length.toString(),
                       style:
                           TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     ),
@@ -65,12 +79,22 @@ class ProfileWidget extends StatelessWidget {
                 ),
               ),
               FlatButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.of(context).push(
+                    PageTransition(
+                      type: PageTransitionType.transferRight,
+                      child: PeopleListScreen(
+                        listTitle: 'Followers',
+                        list: user.followers.map((e) => e.sId).toList(),
+                      ),
+                    ),
+                  );
+                },
                 disabledTextColor: Colors.grey[600],
                 child: Column(
                   children: <Widget>[
                     Text(
-                      user.followerCount.toString(),
+                      user.followers.length.toString(),
                       style:
                           TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     ),

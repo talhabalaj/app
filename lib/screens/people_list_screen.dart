@@ -25,15 +25,18 @@ class _PeopleListScreenState extends State<PeopleListScreen> {
     if (userMap.containsKey(userId)) return userMap[userId];
     final userService = Provider.of<UserService>(context);
 
+    userService.getUserProfile(userId).then((value) => {
+          if (this.mounted)
+            this.setState(() {
+              userMap[userId] = value;
+            })
+        });
 
-
+    return null;
   }
-
-
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,

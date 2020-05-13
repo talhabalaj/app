@@ -42,7 +42,7 @@ class _SearchScreenState extends State<SearchScreen> {
           children: searchService.loading
               ? <Widget>[
                   Expanded(
-                    child: SpinKitChasingDots(
+                    child: SpinKitRing(
                       color: Theme.of(context).accentColor,
                     ),
                   )
@@ -137,17 +137,21 @@ class UserListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isUser = user != null;
+
     return FlatButton(
-      onPressed: () {
-        FocusScope.of(context).unfocus();
-        Navigator.push(
-          context,
-          PageTransition(
-            child: ProfileScreen(user: user),
-            type: PageTransitionType.transferRight,
-          ),
-        );
-      },
+      onPressed: isUser
+          ? () {
+              FocusScope.of(context).unfocus();
+              Navigator.push(
+                context,
+                PageTransition(
+                  child: ProfileScreen(user: user),
+                  type: PageTransitionType.transferRight,
+                ),
+              );
+            }
+          : null,
       padding: EdgeInsets.symmetric(horizontal: 18, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -156,26 +160,45 @@ class UserListItem extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 22,
-                backgroundImage:
-                    ExtendedNetworkImageProvider(user.profilePicUrl),
+                backgroundColor: Colors.grey[300],
+                backgroundImage: isUser
+                    ? ExtendedNetworkImageProvider(user.profilePicUrl)
+                    : null,
               ),
               SizedBox(
                 width: 10,
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    user.userName,
-                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                  ),
-                  Text(
-                    '${user.firstName} ${user.lastName}',
-                    style: TextStyle(fontSize: 14),
-                  ),
-                ],
-              )
+              isUser
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text(
+                          user.userName,
+                          style:
+                              TextStyle(fontSize: 13, color: Colors.grey[600]),
+                        ),
+                        Text(
+                          '${user.firstName} ${user.lastName}',
+                          style: TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text(
+                          'Loading',
+                          style:
+                              TextStyle(fontSize: 13, color: Colors.grey[600]),
+                        ),
+                        Text(
+                          'Loading',
+                          style: TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    )
             ],
           ),
           if (chevron) Icon(EvaIcons.chevronRight),

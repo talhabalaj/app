@@ -1,4 +1,5 @@
 import 'package:Moody/models/feed_model.dart';
+import 'package:Moody/models/m_notification_model.dart';
 import 'package:Moody/models/post_model.dart';
 import 'package:Moody/models/user_model.dart';
 import 'package:flutter/widgets.dart';
@@ -36,6 +37,13 @@ class WebResponse<T> {
         var list = data as List;
         if (json['data']['posts'] != null) {
           json['data']['posts'].forEach((v) => list.add(PostModel.fromJson(v)));
+        }
+      } else if (isSubtype<T, List<M_Notification>>()) {
+        data = new List<M_Notification>() as T;
+        var list = data as List;
+        if (json['data']['notifications'] != null) {
+          json['data']['notifications']
+              .forEach((v) => list.add(M_Notification.fromJson(v)));
         }
       } else {
         data = new Map<String, dynamic>() as T;

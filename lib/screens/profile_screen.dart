@@ -22,6 +22,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   UserService userService;
   UserModel user;
   bool isFollowing = false;
+  bool isCurrentUser = false;
 
   @override
   void didChangeDependencies() {
@@ -32,16 +33,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> getProfile() async {
     user = await userService.getUserProfile(widget.user.sId);
-
-    this.setState(() {
-      loading = false;
-    });
+    if (this.mounted)
+      this.setState(() {
+        loading = false;
+      });
   }
 
   @override
   Widget build(BuildContext context) {
     if (user != null) {
-      isFollowing = userService.loggedInUser.isFollowing(user);
+      isFollowing = user.isFollower(userService.loggedInUser);
+      isCurrentUser = userService.loggedInUser.sId == user.sId;
     }
 
     return Scaffold(
@@ -59,7 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                SpinKitChasingDots(
+                SpinKitRing(
                   color: Theme.of(context).accentColor,
                 ),
               ],
@@ -68,26 +70,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
               physics: BouncingScrollPhysics(),
               children: [
                 ProfileWidget(user: user),
-                Center(
-                  child: PrimaryButton(
-                      child: isFollowing ? Text('Unfollow') : Text('Follow'),
-                      onPressed: actionLoading
-                          ? null
-                          : () async {
-                              this.setState(() {
-                                actionLoading = true;
-                              });
-                              if (isFollowing) {
-                                await userService.changeFollowState(user,
-                                    action: UserFollowAction.UNFOLLOW);
-                              } else {
-                                await userService.changeFollowState(user);
-                              }
-                              this.setState(() {
-                                actionLoading = false;
-                              });
-                            }),
-                ),
+                if (!isCurrentUser)
+                  Center(
+                    child: PrimaryButton(
+                        child: isFollowing ? Text('Unfollow') : Text('Follow'),
+                        onPressed: actionLoading
+                            ? null
+                            : () async {
+                                this.setState(() {
+                                  actionLoading = true;
+                                });
+                                if (isFollowing) {
+                                  await userService.changeFollowState(user,
+                                      action: UserFollowAction.UNFOLLOW);
+                                } else {
+                                  await userService.changeFollowState(user);
+                                }
+                                this.setState(() {
+                                  actionLoading = false;
+                                });
+                              }),
+                  ),
                 SizedBox(
                   height: 30,
                 ),
