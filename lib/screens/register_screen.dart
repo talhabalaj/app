@@ -93,7 +93,8 @@ class _RegisterFormState extends State<RegisterForm> {
           lastName: lastName,
           password: password,
         );
-        Navigator.of(context).popAndPushNamed(HomeScreen.id);
+        Navigator.pushNamedAndRemoveUntil(
+            context, HomeScreen.id, (route) => false);
       } on WebErrorResponse catch (e) {
         showErrorDialog(context: context, e: e);
       }

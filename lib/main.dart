@@ -64,7 +64,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     FirebaseAnalytics analytics = FirebaseAnalytics();
     IconThemeData iconThemeData = IconThemeData(color: kPrimaryColor);
-    TextTheme textThemeData = GoogleFonts.montserratTextTheme();
+    TextTheme textThemeData = GoogleFonts.latoTextTheme();
 
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
@@ -81,8 +81,8 @@ class MyApp extends StatelessWidget {
         appBarTheme: AppBarTheme(
           color: Colors.white,
           brightness: Brightness.light,
-          textTheme: textThemeData,
           elevation: 0,
+          textTheme: textThemeData,
           iconTheme: iconThemeData,
         ),
         textTheme: textThemeData,

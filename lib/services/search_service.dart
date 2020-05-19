@@ -20,7 +20,7 @@ class SearchService extends ChangeNotifier {
   SearchService update(AuthService authService) {
     print(
         '[SearchService] updated! ${authService.user != null ? authService.user.userName : ''}');
-    if (authService.user != null) this.reset();
+    if (authService.user == null) this.reset();
     this.authService = authService;
     return this;
   }
@@ -36,20 +36,23 @@ class SearchService extends ChangeNotifier {
 
   Future<void> search(String query) async {
     error = '';
-
-    if (query == '') {
-      searchTerm = '';
-      list.removeRange(0, list.length);
-      notifyListeners();
-      return;
-    }
-
     searchTerm = query;
     this.loading = true;
     notifyListeners();
 
     if (cancelToken != null) {
-      cancelToken.cancel();
+      try {
+        cancelToken.cancel();
+      } catch (e) {
+        print(e);
+      }
+    }
+
+    if (query == '') {
+      list.removeRange(0, list.length);
+      this.loading = false;
+      notifyListeners();
+      return;
     }
 
     cancelToken = new CancelToken();

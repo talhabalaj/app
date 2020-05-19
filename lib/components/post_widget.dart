@@ -1,11 +1,14 @@
 import 'dart:typed_data';
 
+import 'package:Moody/components/loader.dart';
 import 'package:Moody/helpers/dialogs.dart';
+import 'package:Moody/helpers/navigation.dart';
+import 'package:Moody/models/comment_model.dart';
 import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/models/post_model.dart';
 import 'package:Moody/models/user_model.dart';
 import 'package:Moody/screens/people_list_screen.dart';
-import 'package:Moody/screens/post_screen.dart';
+import 'package:Moody/screens/post_comments_screen.dart';
 import 'package:Moody/screens/profile_screen.dart';
 import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/feed_service.dart';
@@ -13,16 +16,17 @@ import 'package:Moody/services/post_service.dart';
 import 'package:Moody/services/user_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:extended_image/extended_image.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_page_transition/flutter_page_transition.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_moment/simple_moment.dart';
 
 class PostWidget extends StatefulWidget {
   final PostModel post;
+  final bool compact;
 
-  const PostWidget({Key key, this.post}) : super(key: key);
+  const PostWidget({Key key, this.post, this.compact = false})
+      : super(key: key);
 
   @override
   _PostWidgetState createState() => _PostWidgetState();
@@ -53,7 +57,16 @@ class _PostWidgetState extends State<PostWidget> {
             await toggleLike();
           }
         : null;
-    final Function comment = isNetworkPost ? () {} : null;
+    final Function comment = isNetworkPost
+        ? () {
+            gotoPageWithAnimation(
+              context: context,
+              page: PostCommentsScreen(
+                postId: widget.post.sId,
+              ),
+            );
+          }
+        : null;
 
     return Column(
       mainAxisSize: MainAxisSize.max,
@@ -121,16 +134,17 @@ class _PostWidgetState extends State<PostWidget> {
                         ),
                   onPressed: like,
                 ),
-                IconButton(
-                  icon: Icon(EvaIcons.messageSquareOutline),
-                  iconSize: 30,
-                  onPressed: comment,
-                ),
+                if (!widget.compact)
+                  IconButton(
+                    icon: Icon(EvaIcons.messageSquareOutline),
+                    iconSize: 30,
+                    onPressed: comment,
+                  ),
               ],
             ),
           ),
         ),
-        PostBottomDetails(post: widget.post),
+        PostBottomDetails(post: widget.post, comments: !widget.compact),
         SizedBox(
           height: 30,
         ),
@@ -163,12 +177,10 @@ class PostTopBar extends StatelessWidget {
         children: <Widget>[
           GestureDetector(
             onTap: () {
-              Navigator.of(context).push(
-                PageTransition(
-                  type: PageTransitionType.transferRight,
-                  child: ProfileScreen(
-                    user: post.user,
-                  ),
+              gotoPageWithAnimation(
+                context: context,
+                page: ProfileScreen(
+                  user: post.user,
                 ),
               );
             },
@@ -219,24 +231,31 @@ class PostTopBar extends StatelessWidget {
   }
 }
 
-class PostBottomDetails extends StatelessWidget {
-  const PostBottomDetails({Key key, this.post}) : super(key: key);
-
+class PostBottomDetails extends StatefulWidget {
+  PostBottomDetails({Key key, this.post, this.comments = true})
+      : super(key: key);
   final PostModel post;
+  final bool comments;
 
+  @override
+  _PostBottomDetailsState createState() => _PostBottomDetailsState();
+}
+
+class _PostBottomDetailsState extends State<PostBottomDetails> {
   Widget getLikesDescription(context) {
     final loggedInUser = Provider.of<AuthService>(context, listen: false).user;
     final knownLikers = loggedInUser.following
-        .where((f) => post.likes.indexOf(f.sId) != -1)
+        .where((f) => widget.post.likes.indexOf(f.sId) != -1)
         .toList()
           ..shuffle();
     final textStyle = TextStyle(fontWeight: FontWeight.bold);
-    Widget likeWidget = Text('${post.likes.length} likes', style: textStyle);
+    Widget likeWidget =
+        Text('${widget.post.likes.length} likes', style: textStyle);
 
     if (knownLikers.length > 0) {
       List<Widget> likeWidgetList = [
         Padding(
-          padding: const EdgeInsets.only(right: 5),
+          padding: const EdgeInsets.only(right: 5, left: 1),
           child: CircleAvatar(
             radius: 10,
             backgroundImage:
@@ -249,10 +268,10 @@ class PostBottomDetails extends StatelessWidget {
         ),
         Text(knownLikers[0].userName, style: textStyle),
       ];
-      if (post.likes.length - 1 > 0)
+      if (widget.post.likes.length - 1 > 0)
         likeWidgetList.add(
           Text(
-            ' and ${post.likes.length - 1} others',
+            ' and ${widget.post.likes.length - 1} others',
             style: textStyle,
           ),
         );
@@ -264,14 +283,11 @@ class PostBottomDetails extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          PageTransition(
-            child: PeopleListScreen(
-              list: post.likes,
-              listTitle: "Likers",
-            ),
-            type: PageTransitionType.transferRight,
+        gotoPageWithAnimation(
+          context: context,
+          page: PeopleListScreen(
+            list: widget.post.likes,
+            listTitle: "Likers",
           ),
         );
       },
@@ -290,31 +306,120 @@ class PostBottomDetails extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           getLikesDescription(context),
-          if (post.caption != '')
-            Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: post.user.userName,
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  TextSpan(text: " "),
-                  TextSpan(text: post.caption)
-                ],
-              ),
-            ),
-          if (post.createdAt != null)
+          if (widget.post.caption != '') PostCaption(post: widget.post),
+          if (widget.post.comments.length > 0 && widget.comments)
+            PostCompactComments(post: widget.post),
+          if (widget.post.createdAt != null)
             Text(
               Moment.fromDate(
                 DateTime.now(),
               ).from(
-                DateTime.parse(post.createdAt),
+                DateTime.parse(widget.post.createdAt),
               ),
               style: TextStyle(
                 color: Colors.grey[500],
                 fontSize: 12,
               ),
             )
+        ],
+      ),
+    );
+  }
+}
+
+class PostCompactComments extends StatefulWidget {
+  PostCompactComments({
+    Key key,
+    @required this.post,
+  }) : super(key: key);
+
+  final PostModel post;
+
+  @override
+  _PostCompactCommentsState createState() => _PostCompactCommentsState();
+}
+
+class _PostCompactCommentsState extends State<PostCompactComments> {
+  TapGestureRecognizer viewAllCommentsTap = TapGestureRecognizer();
+
+  @override
+  void initState() {
+    super.initState();
+    viewAllCommentsTap.onTap = () {
+      gotoPageWithAnimation(
+        context: context,
+        page: PostCommentsScreen(postId: widget.post.sId),
+      );
+    };
+  }
+
+  TextSpan buildComment(CommentModel comment) {
+    return TextSpan(
+        style: TextStyle(
+          color: comment.isProcessing ? Colors.black45 : Colors.black,
+        ),
+        children: [
+          TextSpan(
+            text: comment.user.userName,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          TextSpan(text: " "),
+          TextSpan(text: comment.message),
+          TextSpan(text: '\n'),
+        ]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text.rich(
+      TextSpan(
+        children: [
+          for (CommentModel comment in widget.post.comments.reversed
+              .toList()
+              .getRange(
+                0,
+                (widget.post.comments.length > 3
+                    ? 3
+                    : widget.post.comments.length),
+              )
+              .toList()
+              .reversed)
+            buildComment(comment),
+          if (widget.post.comments.length > 3)
+            TextSpan(
+              text: 'View all comments',
+              style: TextStyle(
+                color: Colors.grey[600],
+              ),
+              recognizer: viewAllCommentsTap,
+            )
+        ],
+      ),
+    );
+  }
+}
+
+class PostCaption extends StatelessWidget {
+  const PostCaption({
+    Key key,
+    @required this.post,
+  }) : super(key: key);
+
+  final PostModel post;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(children: [
+            TextSpan(
+              text: post.user.userName,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            TextSpan(text: " "),
+            TextSpan(text: post.caption),
+          ]),
         ],
       ),
     );
@@ -366,51 +471,69 @@ class _UserPostsState extends State<UserPosts> {
   @override
   Widget build(BuildContext context) {
     return postsLoading
-        ? SpinKitRing(
-            color: Theme.of(context).accentColor,
-          )
+        ? Loader()
         : Container(
+            height: MediaQuery.of(context).size.height - 400,
             color: Colors.grey[100],
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                childAspectRatio: 1 / 1,
-                mainAxisSpacing: 2,
-                crossAxisSpacing: 2,
-              ),
-              shrinkWrap: true,
-              itemCount: userPosts.length + 1,
-              physics: BouncingScrollPhysics(),
-              itemBuilder: (context, index) {
-                if (index < userPosts.length) {
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        PageTransition(
-                          type: PageTransitionType.transferUp,
-                          child: PostScreen(post: userPosts[index]),
-                        ),
-                      );
-                    },
-                    child: ExtendedImage.network(
-                      userPosts[index].imageUrl,
-                      cache: true,
-                    ),
-                  );
-                } else {
-                  if (lastIndexFetched < index) {
-                    lastIndexFetched = index + 1;
+            child: userPosts.length > 0
+                ? CustomScrollView(
+                    physics: ScrollPhysics(),
+                    slivers: <Widget>[
+                      SliverGrid(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            if (index < userPosts.length) {
+                              return GestureDetector(
+                                onTap: () {
+                                  gotoPageWithAnimation(
+                                    context: context,
+                                    page: PostCommentsScreen(
+                                      postId: userPosts[index].sId,
+                                    ),
+                                  );
+                                },
+                                child: ExtendedImage.network(
+                                  userPosts[index].imageUrl,
+                                  cache: true,
+                                ),
+                              );
+                            } else {
+                              if (lastIndexFetched < index) {
+                                lastIndexFetched = index;
 
-                    getUserPosts(offset: userPosts.length).then((value) {
-                      if (this.mounted)
-                        this.setState(() {
-                          userPosts.addAll(value);
-                        });
-                    });
-                  }
-                }
-              },
-            ),
+                                getUserPosts(offset: userPosts.length)
+                                    .then((value) {
+                                  if (this.mounted)
+                                    this.setState(() {
+                                      userPosts.addAll(value);
+                                      postsLoading = false;
+                                    });
+                                });
+                              }
+                              return null;
+                            }
+                          },
+                          childCount: userPosts.length + 1,
+                        ),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          childAspectRatio: 1 / 1,
+                          mainAxisSpacing: 2,
+                          crossAxisSpacing: 2,
+                        ),
+                      ),
+                      if (postsLoading)
+                        SliverToBoxAdapter(
+                          child: Loader(),
+                        ),
+                    ],
+                  )
+                : Center(
+                    child: Text(
+                      "No posts to show.",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ),
           );
   }
 }

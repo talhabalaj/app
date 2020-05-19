@@ -1,3 +1,4 @@
+import 'package:Moody/components/loader.dart';
 import 'package:Moody/components/post_widget.dart';
 import 'package:Moody/components/primary_button.dart';
 import 'package:Moody/components/profile_widget.dart';
@@ -42,7 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     if (user != null) {
-      isFollowing = user.isFollower(userService.loggedInUser);
+      isFollowing = userService.loggedInUser.isFollowing(user);
       isCurrentUser = userService.loggedInUser.sId == user.sId;
     }
 
@@ -57,22 +58,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
       body: loading
-          ? Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                SpinKitRing(
-                  color: Theme.of(context).accentColor,
-                ),
-              ],
-            )
-          : ListView(
-              physics: BouncingScrollPhysics(),
-              children: [
-                ProfileWidget(user: user),
-                if (!isCurrentUser)
-                  Center(
-                    child: PrimaryButton(
+          ? ProfilePlaceHolderWigdet()
+          : RefreshIndicator(
+              onRefresh: () async {
+                await getProfile();
+              },
+              child: ListView(
+                physics: AlwaysScrollableScrollPhysics(),
+                children: [
+                  ProfileWidget(user: user),
+                  if (!isCurrentUser)
+                    Center(
+                      child: PrimaryButton(
                         child: isFollowing ? Text('Unfollow') : Text('Follow'),
                         onPressed: actionLoading
                             ? null
@@ -89,13 +86,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 this.setState(() {
                                   actionLoading = false;
                                 });
-                              }),
+                              },
+                      ),
+                    ),
+                  SizedBox(
+                    height: 30,
                   ),
-                SizedBox(
-                  height: 30,
-                ),
-                UserPosts(user: user)
-              ],
+                  UserPosts(user: user)
+                ],
+              ),
             ),
     );
   }

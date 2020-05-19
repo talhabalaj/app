@@ -2,23 +2,23 @@ import 'dart:io';
 
 import 'package:Moody/models/post_model.dart';
 import 'package:Moody/services/auth_service.dart';
+import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_editor/image_editor.dart';
 import 'package:provider/provider.dart';
 
-class CreatePostScreen extends StatefulWidget {
-  static String id = '/createCreatePost';
+class EditImageScreen extends StatefulWidget {
   final File image;
 
-  CreatePostScreen({this.image});
+  EditImageScreen({this.image});
 
   @override
-  _CreatePostScreenState createState() => _CreatePostScreenState();
+  _EditImageScreenState createState() => _EditImageScreenState();
 }
 
-class _CreatePostScreenState extends State<CreatePostScreen> {
+class _EditImageScreenState extends State<EditImageScreen> {
   final GlobalKey<ExtendedImageEditorState> editorKey =
       GlobalKey<ExtendedImageEditorState>();
 
@@ -26,7 +26,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Create Post"),
+        title: Text("Edit Image"),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.check),
@@ -58,35 +58,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 imageEditorOption: option,
               );
 
-              final controller = TextEditingController();
-              await showDialog<String>(
-                context: context,
-                builder: (context) => SimpleDialog(
-                  title: Text("Add Caption"),
-                  children: <Widget>[
-                    TextField(
-                      controller: controller,
-                    ),
-                    FlatButton(
-                      child: Text("Done"),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
-                ),
-              );
               final image = await FlutterImageCompress.compressWithList(
                   result.toList(),
                   format: CompressFormat.jpeg);
-              String caption = controller.text;
-              Navigator.pop<PostModel>(
-                  context,
-                  PostModel.inMemory(
-                      image: image,
-                      caption: caption,
-                      user: Provider.of<AuthService>(context, listen: false)
-                          .user));
+
+              Navigator.pop(context, image);
             },
           ),
         ],
@@ -101,11 +77,39 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           extendedImageEditorKey: editorKey,
           initEditorConfigHandler: (state) {
             return EditorConfig(
-                maxScale: 8.0,
-                cropRectPadding: EdgeInsets.all(20.0),
-                hitTestSize: 20.0,
-                cropAspectRatio: CropAspectRatios.ratio1_1);
+              maxScale: 8.0,
+              cropRectPadding: EdgeInsets.all(20.0),
+              hitTestSize: 20.0,
+              cropAspectRatio: CropAspectRatios.ratio1_1,
+            );
           },
+        ),
+      ),
+      bottomNavigationBar: Container(
+        height: 55,
+        color: Colors.white,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            IconButton(
+              icon: Icon(Icons.flip),
+              onPressed: () {
+                editorKey.currentState.flip();
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.rotate_left),
+              onPressed: () {
+                editorKey.currentState.rotate(right: false);
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.rotate_right),
+              onPressed: () {
+                editorKey.currentState.rotate(right: true);
+              },
+            ),
+          ],
         ),
       ),
     );

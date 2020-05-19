@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'package:Moody/constants.dart';
@@ -21,6 +22,21 @@ class AuthService extends ChangeNotifier {
   UserModel user;
 
   final secureStorage = FlutterSecureStorage();
+
+  Future<void> refreshUser() async {
+    assert(auth != null, "[refreshUser] requires auth");
+
+    user = (await ApiRequest(authService: this)
+            .request<UserModel>('/user/profile'))
+        .data;
+
+    final timer = Timer(Duration(seconds: 10), () {
+      print("Updating user!");
+      refreshUser();
+    });
+
+    notifyListeners();
+  }
 
   Future<void> login(String userName, String password) async {
     http.Response res;
@@ -52,8 +68,7 @@ class AuthService extends ChangeNotifier {
           expiresAt: DateTime.parse(expiresAt),
         );
 
-        user =
-            (await ApiRequest(authService: this).request<UserModel>('/user/profile')).data;
+        await refreshUser();
 
         notifyListeners();
       } else {
@@ -86,9 +101,7 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    if (auth == null) {
-      throw "Oh fuck!";
-    }
+    assert(auth != null, "[logout] requires auth");
 
     try {
       await ApiRequest(authService: this).request('/user/logout');
@@ -112,8 +125,7 @@ class AuthService extends ChangeNotifier {
         ),
       );
 
-      user =
-          (await ApiRequest(authService: this).request<UserModel>('/user/profile')).data;
+      await refreshUser();
     } else {
       throw AuthServiceError("Not logged in");
     }

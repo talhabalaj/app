@@ -1,9 +1,15 @@
 import 'dart:developer';
 
 import 'package:Moody/helpers/authed_request.dart';
+import 'package:Moody/helpers/random.dart';
+import 'package:Moody/models/api_response_model.dart';
+import 'package:Moody/models/comment_model.dart';
+import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/services/auth_service.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:Moody/models/post_model.dart';
+import 'package:toast/toast.dart';
 
 class PostService extends ChangeNotifier {
   AuthService authService;
@@ -24,6 +30,14 @@ class PostService extends ChangeNotifier {
     }
   }
 
+  Future<PostModel> getPost(String sId) async {
+    return (await ApiRequest(authService: authService).request<PostModel>(
+      '/post/$sId',
+      method: HttpRequestMethod.GET,
+    ))
+        .data;
+  }
+
   Future<void> unlike(PostModel post) async {
     if (post.likes.indexOf(authService.user.sId) != -1) {
       post.likes.remove(authService.user.sId);
@@ -36,6 +50,15 @@ class PostService extends ChangeNotifier {
         notifyListeners();
       }
     }
+  }
+
+  Future<WebResponse<CommentModel>> comment(
+      PostModel post, String comment) async {
+    final formData = {"message": comment};
+    return ApiRequest(authService: authService).request<CommentModel>(
+        '/post/${post.sId}/comment',
+        method: HttpRequestMethod.POST,
+        data: formData);
   }
 
   PostService update(AuthService authService) {

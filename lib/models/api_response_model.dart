@@ -1,3 +1,4 @@
+import 'package:Moody/models/comment_model.dart';
 import 'package:Moody/models/feed_model.dart';
 import 'package:Moody/models/m_notification_model.dart';
 import 'package:Moody/models/post_model.dart';
@@ -24,6 +25,8 @@ class WebResponse<T> {
         data = FeedModel.fromJson(json['data']['posts']) as T;
       } else if (T == PostModel) {
         data = PostModel.fromJson(json['data']['post']) as T;
+      } else if (T == CommentModel) {
+        data = CommentModel.fromJson(json['data']['comment']) as T;
       } else if (T == Map) {
         data = json['data'];
       } else if (isSubtype<T, List<UserModel>>()) {

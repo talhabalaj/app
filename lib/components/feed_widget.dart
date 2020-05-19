@@ -1,3 +1,4 @@
+import 'package:Moody/components/loader.dart';
 import 'package:Moody/components/post_widget.dart';
 import 'package:Moody/helpers/dialogs.dart';
 import 'package:Moody/services/feed_service.dart';
@@ -46,10 +47,7 @@ class _FeedWidgetState extends State<FeedWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (feedService.feed == null)
-      return SpinKitRing(
-        color: Theme.of(context).accentColor,
-      );
+    if (feedService.feed == null) return Loader();
 
     final feed = feedService.feed;
 
@@ -68,16 +66,12 @@ class _FeedWidgetState extends State<FeedWidget> {
             if (indexRequested < index && feed.posts.length != 0) {
               feedService.getOldPost();
               indexRequested = index + 1;
-              return SpinKitRing(
-                color: Theme.of(context).accentColor,
-              );
+              return Loader();
             }
 
             if (feed.posts.length == 0 && index == 0) {
               final child = feedService.loading
-                  ? SpinKitRing(
-                      color: Theme.of(context).accentColor,
-                    )
+                  ? Loader()
                   : Text(
                       'No posts to show',
                       style: TextStyle(

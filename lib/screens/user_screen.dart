@@ -1,7 +1,9 @@
 import 'package:Moody/components/post_widget.dart';
 import 'package:Moody/components/primary_button.dart';
 import 'package:Moody/components/profile_widget.dart';
+import 'package:Moody/helpers/navigation.dart';
 import 'package:Moody/models/error_response_model.dart';
+import 'package:Moody/screens/edit_profile_screen.dart';
 import 'package:Moody/services/auth_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
@@ -54,27 +56,36 @@ class _UserScreenState extends State<UserScreen> {
             ),
         ],
       ),
-      body: ListView(
-        physics: BouncingScrollPhysics(),
-        children: [
-          ProfileWidget(
-            user: authService.user,
-          ),
-          Center(
-            child: PrimaryButton(
-              onPressed: () {
-                
-              },
-              child: Text('Edit Profile'),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await authService.refreshUser();
+        },
+        child: ListView(
+          shrinkWrap: true,
+          physics: AlwaysScrollableScrollPhysics(),
+          children: [
+            ProfileWidget(
+              user: authService.user,
             ),
-          ),
-          SizedBox(
-            height: 25,
-          ),
-          UserPosts(
-            user: authService.user,
-          )
-        ],
+            Center(
+              child: PrimaryButton(
+                onPressed: () {
+                  gotoPageWithAnimation(
+                    context: context,
+                    page: EditProfileScreen(),
+                  );
+                },
+                child: Text('Edit Profile'),
+              ),
+            ),
+            SizedBox(
+              height: 25,
+            ),
+            UserPosts(
+              user: authService.user,
+            )
+          ],
+        ),
       ),
     );
   }

@@ -1,11 +1,12 @@
 import 'package:Moody/helpers/dialogs.dart';
 import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/models/post_model.dart';
-import 'package:Moody/screens/create_post_screen.dart';
+import 'package:Moody/screens/edit_image_screen.dart';
 import 'package:Moody/screens/feed_screen.dart';
 import 'package:Moody/screens/notification_screen.dart';
 import 'package:Moody/screens/search_screen.dart';
 import 'package:Moody/screens/user_screen.dart';
+import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/feed_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
@@ -34,21 +35,46 @@ class _HomeScreenState extends State<HomeScreen> {
         resizeToAvoidBottomInset: false,
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            final image =
-                await ImagePicker.pickImage(source: ImageSource.gallery);
+            final image = await ImagePicker.pickImage(
+                source: ImageSource.gallery, imageQuality: 100);
 
             if (image != null) {
-              final createPost = await Navigator.of(context).push(
+              final imageEdited = await Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => CreatePostScreen(image: image),
+                  builder: (context) => EditImageScreen(image: image),
                 ),
               );
 
-              this.setState(() {
-                index = 0;
-              });
+              if (imageEdited != null) {
+                this.setState(() {
+                  index = 0;
+                });
+                final controller = TextEditingController();
 
-              if (createPost is PostModel) {
+                await showDialog<String>(
+                  context: context,
+                  builder: (context) => SimpleDialog(
+                    title: Text("Add Caption"),
+                    children: <Widget>[
+                      TextField(
+                        controller: controller,
+                      ),
+                      FlatButton(
+                        child: Text("Done"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  ),
+                );
+
+                String caption = controller.text;
+                final createPost = PostModel.inMemory(
+                  image: imageEdited,
+                  caption: caption,
+                  user: Provider.of<AuthService>(context, listen: false).user,
+                );
                 try {
                   await Provider.of<FeedService>(context, listen: false)
                       .createPost(createPost);
