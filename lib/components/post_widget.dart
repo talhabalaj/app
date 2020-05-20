@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:Moody/components/gridview_loading.dart';
 import 'package:Moody/components/loader.dart';
 import 'package:Moody/helpers/dialogs.dart';
 import 'package:Moody/helpers/navigation.dart';
@@ -9,6 +10,7 @@ import 'package:Moody/models/post_model.dart';
 import 'package:Moody/models/user_model.dart';
 import 'package:Moody/screens/people_list_screen.dart';
 import 'package:Moody/screens/post_comments_screen.dart';
+import 'package:Moody/screens/post_screen.dart';
 import 'package:Moody/screens/profile_screen.dart';
 import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/feed_service.dart';
@@ -20,13 +22,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_moment/simple_moment.dart';
+import 'package:toast/toast.dart';
 
 class PostWidget extends StatefulWidget {
   final PostModel post;
-  final bool compact;
 
-  const PostWidget({Key key, this.post, this.compact = false})
-      : super(key: key);
+  const PostWidget({Key key, this.post}) : super(key: key);
 
   @override
   _PostWidgetState createState() => _PostWidgetState();
@@ -134,17 +135,16 @@ class _PostWidgetState extends State<PostWidget> {
                         ),
                   onPressed: like,
                 ),
-                if (!widget.compact)
-                  IconButton(
-                    icon: Icon(EvaIcons.messageSquareOutline),
-                    iconSize: 30,
-                    onPressed: comment,
-                  ),
+                IconButton(
+                  icon: Icon(EvaIcons.messageSquareOutline),
+                  iconSize: 30,
+                  onPressed: comment,
+                ),
               ],
             ),
           ),
         ),
-        PostBottomDetails(post: widget.post, comments: !widget.compact),
+        PostBottomDetails(post: widget.post),
         SizedBox(
           height: 30,
         ),
@@ -171,7 +171,7 @@ class PostTopBar extends StatelessWidget {
         ),
         color: Colors.white,
       ),
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -187,6 +187,7 @@ class PostTopBar extends StatelessWidget {
             child: Row(
               children: <Widget>[
                 CircleAvatar(
+                  radius: 18,
                   backgroundImage: ExtendedNetworkImageProvider(
                     post.user.profilePicUrl,
                     cache: true,
@@ -195,7 +196,12 @@ class PostTopBar extends StatelessWidget {
                 SizedBox(
                   width: 10,
                 ),
-                Text('${post.user.userName}'),
+                Text(
+                  '${post.user.userName}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
           ),
@@ -212,8 +218,9 @@ class PostTopBar extends StatelessWidget {
                     try {
                       await Provider.of<FeedService>(context, listen: false)
                           .deletePost(post);
+                      Toast.show("Post was deleted successfully.", context);
                     } on WebErrorResponse catch (e) {
-                      showErrorDialog(context: context, e: e);
+                      Toast.show(e.message, context);
                     }
                   }
                 }
@@ -232,10 +239,8 @@ class PostTopBar extends StatelessWidget {
 }
 
 class PostBottomDetails extends StatefulWidget {
-  PostBottomDetails({Key key, this.post, this.comments = true})
-      : super(key: key);
+  PostBottomDetails({Key key, this.post}) : super(key: key);
   final PostModel post;
-  final bool comments;
 
   @override
   _PostBottomDetailsState createState() => _PostBottomDetailsState();
@@ -307,7 +312,7 @@ class _PostBottomDetailsState extends State<PostBottomDetails> {
         children: <Widget>[
           getLikesDescription(context),
           if (widget.post.caption != '') PostCaption(post: widget.post),
-          if (widget.post.comments.length > 0 && widget.comments)
+          if (widget.post.comments.length > 0)
             PostCompactComments(post: widget.post),
           if (widget.post.createdAt != null)
             Text(
@@ -340,19 +345,6 @@ class PostCompactComments extends StatefulWidget {
 }
 
 class _PostCompactCommentsState extends State<PostCompactComments> {
-  TapGestureRecognizer viewAllCommentsTap = TapGestureRecognizer();
-
-  @override
-  void initState() {
-    super.initState();
-    viewAllCommentsTap.onTap = () {
-      gotoPageWithAnimation(
-        context: context,
-        page: PostCommentsScreen(postId: widget.post.sId),
-      );
-    };
-  }
-
   TextSpan buildComment(CommentModel comment) {
     return TextSpan(
         style: TextStyle(
@@ -371,29 +363,36 @@ class _PostCompactCommentsState extends State<PostCompactComments> {
 
   @override
   Widget build(BuildContext context) {
-    return Text.rich(
-      TextSpan(
-        children: [
-          for (CommentModel comment in widget.post.comments.reversed
-              .toList()
-              .getRange(
-                0,
-                (widget.post.comments.length > 3
-                    ? 3
-                    : widget.post.comments.length),
+    return GestureDetector(
+      onTap: () {
+        gotoPageWithAnimation(
+          context: context,
+          page: PostCommentsScreen(postId: widget.post.sId),
+        );
+      },
+      child: Text.rich(
+        TextSpan(
+          children: [
+            for (CommentModel comment in widget.post.comments.reversed
+                .toList()
+                .getRange(
+                  0,
+                  (widget.post.comments.length > 3
+                      ? 3
+                      : widget.post.comments.length),
+                )
+                .toList()
+                .reversed)
+              buildComment(comment),
+            if (widget.post.comments.length > 3)
+              TextSpan(
+                text: 'View all comments',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                ),
               )
-              .toList()
-              .reversed)
-            buildComment(comment),
-          if (widget.post.comments.length > 3)
-            TextSpan(
-              text: 'View all comments',
-              style: TextStyle(
-                color: Colors.grey[600],
-              ),
-              recognizer: viewAllCommentsTap,
-            )
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -471,7 +470,7 @@ class _UserPostsState extends State<UserPosts> {
   @override
   Widget build(BuildContext context) {
     return postsLoading
-        ? Loader()
+        ? GridViewLoading()
         : Container(
             height: MediaQuery.of(context).size.height - 400,
             color: Colors.grey[100],
@@ -487,8 +486,8 @@ class _UserPostsState extends State<UserPosts> {
                                 onTap: () {
                                   gotoPageWithAnimation(
                                     context: context,
-                                    page: PostCommentsScreen(
-                                      postId: userPosts[index].sId,
+                                    page: PostScreen(
+                                      post: userPosts[index],
                                     ),
                                   );
                                 },

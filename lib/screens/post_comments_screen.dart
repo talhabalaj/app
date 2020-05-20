@@ -86,7 +86,7 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Post'),
+          title: Text('Comments'),
         ),
         body: loading
             ? Loader()
@@ -101,15 +101,66 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
                 },
                 child: ListView(
                   children: <Widget>[
-                    PostWidget(
-                      post: post,
-                      compact: true,
-                    ),
+                    if (post.caption != '')
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15.0, vertical: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: <Widget>[
+                                CircleAvatar(
+                                  radius: 14,
+                                  backgroundImage: ExtendedNetworkImageProvider(
+                                      post.user.profilePicUrl),
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text(
+                                      post.user.userName,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      post.caption,
+                                      softWrap: true,
+                                    ),
+                                    Text(
+                                      Moment.now().from(
+                                        DateTime.parse(post.createdAt),
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                     Divider(),
-                    for (CommentModel comment in post.comments.reversed)
+                    if (post.comments.length == 0)
+                      Container(
+                        padding: EdgeInsets.all(20),
+                        alignment: Alignment.center,
+                        child: Text('No comments on this post.'),
+                      ),
+                    for (CommentModel comment in post.comments)
                       PostFullComment(
                         comment: comment,
                       ),
+                    SizedBox(
+                      height: 100,
+                    ),
                   ],
                   physics: AlwaysScrollableScrollPhysics(),
                 ),

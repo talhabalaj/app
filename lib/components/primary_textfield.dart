@@ -7,7 +7,7 @@ class PrimaryStyleTextField extends StatelessWidget {
       this.controller,
       this.onChanged,
       this.suffixIcon,
-      this.autofocus = true,
+      this.autofocus = false,
       this.prefixIcon,
       this.hintText = 'Text'})
       : super(key: key);

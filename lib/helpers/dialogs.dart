@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../constants.dart';
 
 Future showErrorDialog({BuildContext context, WebErrorResponse e}) {
+  print(e.code);
   return showDialog(
     context: context,
     child: AlertDialog(

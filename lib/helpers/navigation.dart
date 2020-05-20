@@ -4,7 +4,7 @@ import 'package:flutter_page_transition/flutter_page_transition.dart';
 Future<void> gotoPageWithAnimation(
     {Widget page,
     @required BuildContext context,
-    PageTransitionType type = PageTransitionType.slideLeft}) async {
+    PageTransitionType type = PageTransitionType.slideInLeft}) async {
   return Navigator.push(
     context,
     PageTransition(

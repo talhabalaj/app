@@ -76,6 +76,9 @@ class ApiRequest {
         case DioErrorType.RESPONSE:
           throw WebErrorResponse.fromJson(e.response.data);
           break;
+        case DioErrorType.DEFAULT:
+          print(e.toString());
+          break;
         default:
           throw e;
       }

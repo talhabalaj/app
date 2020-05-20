@@ -8,6 +8,7 @@ import 'package:Moody/screens/search_screen.dart';
 import 'package:Moody/screens/user_screen.dart';
 import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/feed_service.dart';
+import 'package:animations/animations.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -21,6 +22,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int index = 0;
+
   List<Widget> tabs = [
     FeedScreen(),
     SearchScreen(),
@@ -87,7 +89,19 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Icon(EvaIcons.plus),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        body: tabs[index],
+        body: PageTransitionSwitcher(
+          transitionBuilder: (
+            Widget child,
+            Animation<double> primaryAnimation,
+            Animation<double> secondaryAnimation,
+          ) =>
+              FadeThroughTransition(
+            child: child,
+            animation: primaryAnimation,
+            secondaryAnimation: secondaryAnimation,
+          ),
+          child: tabs[index],
+        ),
         bottomNavigationBar: StyledBottomNav(
           index: index,
           onTap: (i) {
