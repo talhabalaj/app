@@ -41,12 +41,12 @@ class WebResponse<T> {
         if (json['data']['posts'] != null) {
           json['data']['posts'].forEach((v) => list.add(PostModel.fromJson(v)));
         }
-      } else if (isSubtype<T, List<M_Notification>>()) {
-        data = new List<M_Notification>() as T;
+      } else if (isSubtype<T, List<MNotification>>()) {
+        data = new List<MNotification>() as T;
         var list = data as List;
         if (json['data']['notifications'] != null) {
           json['data']['notifications']
-              .forEach((v) => list.add(M_Notification.fromJson(v)));
+              .forEach((v) => list.add(MNotification.fromJson(v)));
         }
       } else {
         data = new Map<String, dynamic>() as T;

@@ -9,6 +9,7 @@ import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/post_service.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_moment/simple_moment.dart';
 import 'package:toast/toast.dart';
@@ -209,48 +210,55 @@ class PostFullComment extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: <Widget>[
-              CircleAvatar(
-                radius: 14,
-                backgroundImage:
-                    ExtendedNetworkImageProvider(comment.user.profilePicUrl),
-              ),
-              SizedBox(
-                width: 10,
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    comment.user.userName,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color:
-                          comment.isProcessing ? Colors.black45 : Colors.black,
-                      fontWeight: FontWeight.bold,
-                    ),
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                CircleAvatar(
+                  radius: 14,
+                  backgroundImage:
+                      ExtendedNetworkImageProvider(comment.user.profilePicUrl),
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        comment.user.userName,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: comment.isProcessing
+                              ? Colors.black45
+                              : Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        comment.message,
+                        style: TextStyle(
+                          color: comment.isProcessing
+                              ? Colors.black45
+                              : Colors.black,
+                        ),
+                      ),
+                      if (!comment.isProcessing)
+                        Text(
+                          Moment.now().from(
+                            DateTime.parse(comment.createdAt),
+                          ),
+                          style: TextStyle(
+                            fontSize: 12,
+                          ),
+                        ),
+                    ],
                   ),
-                  Text(
-                    comment.message,
-                    style: TextStyle(
-                      color:
-                          comment.isProcessing ? Colors.black45 : Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          if (!comment.isProcessing)
-            Text(
-              Moment.now().from(
-                DateTime.parse(comment.createdAt),
-              ),
-              style: TextStyle(
-                fontSize: 12,
-              ),
+                ),
+              ],
             ),
+          ),
         ],
       ),
     );

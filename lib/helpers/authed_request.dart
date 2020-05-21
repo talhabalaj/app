@@ -83,5 +83,7 @@ class ApiRequest {
           throw e;
       }
     }
+
+    return null;
   }
 }

@@ -35,14 +35,22 @@ class PostModel {
       });
     }
     if (json['comments'] != null) {
-      comments = new List<CommentModel>();
-      json['comments'].forEach((v) {
-        comments.add(new CommentModel.fromJson(v));
-      });
+      try {
+        comments = new List<CommentModel>();
+        json['comments'].forEach((v) {
+          comments.add(new CommentModel.fromJson(v));
+        });
+      } on TypeError catch (e) {
+        comments = null;
+      }
     }
     sId = json['_id'];
     imageUrl = json['imageUrl'];
-    user = UserModel.fromJson(json['user']);
+    try {
+      user = UserModel.fromJson(json['user']);
+    } on TypeError catch (e) {
+      user = UserModel(sId: json['user']);
+    }
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
   }

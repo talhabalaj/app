@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 class NotificationService extends ChangeNotifier {
-  List<M_Notification> notifications = List<M_Notification>();
+  List<MNotification> notifications = List<MNotification>();
   bool loading = false;
   AuthService authService;
 
@@ -22,7 +22,7 @@ class NotificationService extends ChangeNotifier {
     notifyListeners();
 
     notifications = (await ApiRequest(authService: authService)
-            .request<List<M_Notification>>('/user/notifications'))
+            .request<List<MNotification>>('/user/notifications'))
         .data;
 
     notifyListeners();

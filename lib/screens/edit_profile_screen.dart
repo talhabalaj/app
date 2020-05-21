@@ -1,7 +1,6 @@
 import 'package:Moody/components/loader.dart';
 import 'package:Moody/components/primary_button.dart';
 import 'package:Moody/constants.dart';
-import 'package:Moody/helpers/navigation.dart';
 import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/screens/edit_image_screen.dart';
 import 'package:Moody/services/auth_service.dart';

@@ -42,6 +42,7 @@ dependencies:
   toast: ^0.1.5
   simple_moment: ^1.0.4
   shimmer: ^1.1.1
+  flutter_slidable: ^0.5.4
 
 dev_dependencies:
   flutter_test:
