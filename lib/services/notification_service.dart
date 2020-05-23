@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 
 class NotificationService extends ChangeNotifier {
   List<MNotification> notifications = List<MNotification>();
-  bool hasNewUnreadNotification = false;
+  int newUnreadNotificationCount = 0;
   bool loading = false;
   AuthService authService;
 
@@ -26,9 +26,8 @@ class NotificationService extends ChangeNotifier {
             .request<List<MNotification>>('/user/notifications'))
         .data;
 
-    if (newNotifications.any((element) => !element.softRead)) {
-      hasNewUnreadNotification = true;
-    }
+    newUnreadNotificationCount =
+        newNotifications.where((element) => !element.softRead).length;
 
     notifications = newNotifications;
     this.loading = false;
@@ -47,8 +46,25 @@ class NotificationService extends ChangeNotifier {
     notifyListeners();
   }
 
-  void markNewUnreadNotificationRead() {
-    hasNewUnreadNotification = false;
-    notifyListeners();
+  Future<void> markNewUnreadNotificationRead() async {
+    if (newUnreadNotificationCount > 0) {
+      newUnreadNotificationCount = 0;
+      notifyListeners();
+
+      final notificationIdsToMarkSeen = notifications
+          .where((element) => !element.softRead)
+          .map((e) => e.sId)
+          .toList();
+
+      final formData = {
+        "ids": notificationIdsToMarkSeen,
+      };
+
+      await ApiRequest(authService: authService).request(
+        '/user/notifications/seen',
+        method: HttpRequestMethod.POST,
+        data: formData,
+      );
+    }
   }
 }

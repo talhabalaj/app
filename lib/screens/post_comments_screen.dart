@@ -1,5 +1,6 @@
 import 'package:Moody/components/loader.dart';
-import 'package:Moody/components/post_widget.dart';
+import 'package:eva_icons_flutter/eva_icons_flutter.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:Moody/components/primary_textfield.dart';
 import 'package:Moody/helpers/random.dart';
 import 'package:Moody/models/comment_model.dart';
@@ -202,63 +203,68 @@ class PostFullComment extends StatelessWidget {
 
   final CommentModel comment;
 
+  Future<void> deleteComment() {}
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                CircleAvatar(
-                  radius: 14,
-                  backgroundImage:
-                      ExtendedNetworkImageProvider(comment.user.profilePicUrl),
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        comment.user.userName,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: comment.isProcessing
-                              ? Colors.black45
-                              : Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        comment.message,
-                        style: TextStyle(
-                          color: comment.isProcessing
-                              ? Colors.black45
-                              : Colors.black,
-                        ),
-                      ),
-                      if (!comment.isProcessing)
-                        Text(
-                          Moment.now().from(
-                            DateTime.parse(comment.createdAt),
-                          ),
-                          style: TextStyle(
-                            fontSize: 12,
-                          ),
-                        ),
-                    ],
+    return Slidable(
+      actionPane: SlidableDrawerActionPane(),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  CircleAvatar(
+                    radius: 14,
+                    backgroundImage: ExtendedNetworkImageProvider(
+                        comment.user.profilePicUrl),
                   ),
-                ),
-              ],
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          comment.user.userName,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: comment.isProcessing
+                                ? Colors.black45
+                                : Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          comment.message,
+                          style: TextStyle(
+                            color: comment.isProcessing
+                                ? Colors.black45
+                                : Colors.black,
+                          ),
+                        ),
+                        if (!comment.isProcessing)
+                          Text(
+                            Moment.now().from(
+                              DateTime.parse(comment.createdAt),
+                            ),
+                            style: TextStyle(
+                              fontSize: 12,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

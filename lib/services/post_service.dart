@@ -61,6 +61,15 @@ class PostService extends ChangeNotifier {
         data: formData);
   }
 
+  Future<WebResponse<CommentModel>> deleteComment(
+      PostModel post, String comment) async {
+    final formData = {"message": comment};
+    return ApiRequest(authService: authService).request<CommentModel>(
+        '/post/${post.sId}/comment',
+        method: HttpRequestMethod.POST,
+        data: formData);
+  }
+
   PostService update(AuthService authService) {
     print(
         '[PostService] updated! ${authService.user != null ? authService.user.userName : ''}');

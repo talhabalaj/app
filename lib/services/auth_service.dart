@@ -7,6 +7,7 @@ import 'package:Moody/models/api_response_model.dart';
 import 'package:Moody/models/authtoken_model.dart';
 import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/models/user_model.dart';
+import 'package:Moody/services/fcm_service.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -20,6 +21,7 @@ class AuthServiceError extends Error {
 class AuthService extends ChangeNotifier {
   AuthTokenModel auth;
   UserModel user;
+  FCM fcm;
 
   final secureStorage = FlutterSecureStorage();
 
@@ -69,6 +71,8 @@ class AuthService extends ChangeNotifier {
         );
 
         await refreshUser();
+        // TODO: find a secure way
+        fcm.subscribeToNotifications(user.sId);
 
         notifyListeners();
       } else {
@@ -111,6 +115,8 @@ class AuthService extends ChangeNotifier {
 
     auth = null;
     user = null;
+
+    fcm.unsubscribe();
     notifyListeners();
     await secureStorage.delete(key: 'token');
   }

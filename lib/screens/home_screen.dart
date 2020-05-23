@@ -40,8 +40,8 @@ class _HomeScreenState extends State<HomeScreen> {
         resizeToAvoidBottomInset: false,
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            final image = await ImagePicker.pickImage(
-                source: ImageSource.gallery, imageQuality: 100);
+            final image =
+                await ImagePicker.pickImage(source: ImageSource.gallery);
 
             if (image != null) {
               final imageEdited = await Navigator.of(context).push(
@@ -107,7 +107,8 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         bottomNavigationBar: StyledBottomNav(
           index: index,
-          hasUnreadNotification: notificationService.hasNewUnreadNotification,
+          newUnreadNotificationCount:
+              notificationService.newUnreadNotificationCount,
           onTap: (i) {
             this.setState(() {
               index = i;
@@ -123,7 +124,8 @@ class _HomeScreenState extends State<HomeScreen> {
 class StyledBottomNav extends StatelessWidget {
   final int index;
   final Function(int) onTap;
-  final bool hasUnreadNotification;
+  final int newUnreadNotificationCount;
+  String newUnreadNotificationString;
 
   final List<Icon> leftIcons = [
     Icon(EvaIcons.homeOutline),
@@ -152,8 +154,11 @@ class StyledBottomNav extends StatelessWidget {
     Key key,
     this.index,
     this.onTap,
-    this.hasUnreadNotification = false,
-  }) : super(key: key);
+    this.newUnreadNotificationCount = 0,
+  })  : newUnreadNotificationString = newUnreadNotificationCount > 9
+            ? '9+'
+            : newUnreadNotificationCount.toString(),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -185,18 +190,24 @@ class StyledBottomNav extends StatelessWidget {
                     onTap(itr.key + leftIcons.length);
                   },
                 ),
-                if (itr.key == 0 && hasUnreadNotification)
+                if (itr.key == 0 && newUnreadNotificationCount > 0)
                   Positioned(
                     child: Container(
-                      width: 10,
-                      height: 10,
                       decoration: BoxDecoration(
                         color: Colors.red,
                         shape: BoxShape.circle,
                       ),
+                      padding: EdgeInsets.all(3),
+                      child: Text(
+                        newUnreadNotificationString,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                    top: 9,
-                    right: 15,
+                    top: 5,
+                    right: 13,
                   )
               ],
             ),

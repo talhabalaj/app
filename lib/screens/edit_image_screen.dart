@@ -60,6 +60,7 @@ class _EditImageScreenState extends State<EditImageScreen> {
 
               final image = await FlutterImageCompress.compressWithList(
                   result.toList(),
+                  quality: 100,
                   format: CompressFormat.jpeg);
 
               Navigator.pop(context, image);

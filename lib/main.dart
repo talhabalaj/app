@@ -4,6 +4,7 @@ import 'package:Moody/screens/login_screen.dart';
 import 'package:Moody/screens/register_screen.dart';
 import 'package:Moody/screens/splash_screen.dart';
 import 'package:Moody/services/auth_service.dart';
+import 'package:Moody/services/fcm_service.dart';
 import 'package:Moody/services/feed_service.dart';
 import 'package:Moody/services/notification_service.dart';
 import 'package:Moody/services/post_service.dart';
@@ -12,6 +13,7 @@ import 'package:Moody/services/user_service.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -59,12 +61,17 @@ void main() {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     FirebaseAnalytics analytics = FirebaseAnalytics();
     IconThemeData iconThemeData = IconThemeData(color: kPrimaryColor);
-    TextTheme textThemeData = GoogleFonts.latoTextTheme();
+    TextTheme textThemeData = GoogleFonts.interTextTheme();
 
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(

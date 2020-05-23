@@ -137,6 +137,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           return RefreshIndicator(
             onRefresh: () async {
               await notificationService.refreshNotifications();
+              await notificationService.markNewUnreadNotificationRead();
             },
             child: notificationService.notifications.length == 0
                 ? Text('No new notifications')
