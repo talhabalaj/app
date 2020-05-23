@@ -13,6 +13,7 @@ Map<int, UserNotificationType> notificationMap = {
 
 class MNotification {
   bool read;
+  bool softRead;
   String sId;
   UserModel from;
   UserModel forUser;
@@ -29,10 +30,12 @@ class MNotification {
       this.forUser,
       this.type,
       this.createdAt,
+      this.softRead,
       this.updatedAt});
 
   MNotification.fromJson(Map<String, dynamic> json) {
     read = json['read'];
+    softRead = json['softRead'];
     sId = json['_id'];
 
     from = UserModel.fromJson(json['from']);
@@ -60,6 +63,7 @@ class MNotification {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['read'] = this.read;
+    data['softRead'] = this.softRead;
     data['_id'] = this.sId;
     data['from'] = this.from.toJson();
     data['for'] = this.forUser.toJson();

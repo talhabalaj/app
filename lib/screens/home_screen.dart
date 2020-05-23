@@ -8,6 +8,7 @@ import 'package:Moody/screens/search_screen.dart';
 import 'package:Moody/screens/user_screen.dart';
 import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/feed_service.dart';
+import 'package:Moody/services/notification_service.dart';
 import 'package:animations/animations.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final notificationService = Provider.of<NotificationService>(context);
+
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
@@ -104,10 +107,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         bottomNavigationBar: StyledBottomNav(
           index: index,
+          hasUnreadNotification: notificationService.hasNewUnreadNotification,
           onTap: (i) {
             this.setState(() {
               index = i;
             });
+            if (index == 2) notificationService.markNewUnreadNotificationRead();
           },
         ),
       ),
@@ -118,6 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
 class StyledBottomNav extends StatelessWidget {
   final int index;
   final Function(int) onTap;
+  final bool hasUnreadNotification;
 
   final List<Icon> leftIcons = [
     Icon(EvaIcons.homeOutline),
@@ -146,6 +152,7 @@ class StyledBottomNav extends StatelessWidget {
     Key key,
     this.index,
     this.onTap,
+    this.hasUnreadNotification = false,
   }) : super(key: key);
 
   @override
@@ -168,13 +175,30 @@ class StyledBottomNav extends StatelessWidget {
             width: 20,
           ),
           for (final itr in rightIcons.asMap().entries)
-            IconButton(
-              icon: index == (itr.key + leftIcons.length)
-                  ? iconSelected[(itr.key + leftIcons.length)]
-                  : itr.value,
-              onPressed: () {
-                onTap(itr.key + leftIcons.length);
-              },
+            Stack(
+              children: [
+                IconButton(
+                  icon: index == (itr.key + leftIcons.length)
+                      ? iconSelected[(itr.key + leftIcons.length)]
+                      : itr.value,
+                  onPressed: () {
+                    onTap(itr.key + leftIcons.length);
+                  },
+                ),
+                if (itr.key == 0 && hasUnreadNotification)
+                  Positioned(
+                    child: Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    top: 9,
+                    right: 15,
+                  )
+              ],
             ),
         ],
       ),

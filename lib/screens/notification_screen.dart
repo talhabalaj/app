@@ -1,3 +1,4 @@
+import 'package:Moody/components/loader.dart';
 import 'package:Moody/helpers/navigation.dart';
 import 'package:Moody/models/m_notification_model.dart';
 import 'package:Moody/screens/post_comments_screen.dart';
@@ -19,18 +20,18 @@ class NotificationScreen extends StatefulWidget {
 class _NotificationScreenState extends State<NotificationScreen> {
   Widget buildNotification(MNotification mNotification) {
     InlineSpan richText;
-    Function onTap;
+    Function browseNotification;
 
     switch (mNotification.type) {
       case UserNotificationType.POST_LIKED:
         richText = likeNotificationText(mNotification);
-        onTap = () {
+        browseNotification = () {
           //gotoPageWithAnimation(context: context, page: PostScreen(post: ,));
         };
         break;
       case UserNotificationType.POST_COMMENTED:
         richText = commentNotificationText(mNotification);
-        onTap = () {
+        browseNotification = () {
           gotoPageWithAnimation(
             context: context,
             page: PostCommentsScreen(
@@ -41,7 +42,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         break;
       case UserNotificationType.USER_FOLLOWED:
         richText = followNotificationText(mNotification);
-        onTap = () {
+        browseNotification = () {
           gotoPageWithAnimation(
             context: context,
             page: ProfileScreen(
@@ -53,13 +54,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
       case UserNotificationType.UNKNOWN:
       default:
         richText = unknownNotificationText(mNotification);
-        onTap = null;
+        browseNotification = null;
         break;
     }
 
     return FlatButton(
-      onPressed: onTap,
+      onPressed: () {
+        Provider.of<NotificationService>(context, listen: false)
+            .markNotificationAsRead(mNotification.sId);
+        browseNotification();
+      },
       padding: EdgeInsets.all(10),
+      color: mNotification.read ? Colors.white : Colors.grey[200],
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -132,16 +138,19 @@ class _NotificationScreenState extends State<NotificationScreen> {
             onRefresh: () async {
               await notificationService.refreshNotifications();
             },
-            child: ListView(
-              physics: AlwaysScrollableScrollPhysics(),
-              children: <Widget>[
-                for (MNotification mNotification
-                    in notificationService.notifications)
-                  buildNotification(
-                    mNotification,
+            child: notificationService.notifications.length == 0
+                ? Text('No new notifications')
+                : ListView.separated(
+                    itemBuilder: (context, index) => buildNotification(
+                      notificationService.notifications[index],
+                    ),
+                    physics: AlwaysScrollableScrollPhysics(),
+                    itemCount: notificationService.notifications.length,
+                    separatorBuilder: (context, index) => Divider(
+                      height: 1,
+                      thickness: 1,
+                    ),
                   ),
-              ],
-            ),
           );
         },
       ),

@@ -9,7 +9,6 @@ import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/post_service.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_moment/simple_moment.dart';
 import 'package:toast/toast.dart';

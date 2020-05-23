@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:Moody/components/default_shimmer.dart';
 import 'package:Moody/components/gridview_loading.dart';
 import 'package:Moody/components/loader.dart';
 import 'package:Moody/helpers/dialogs.dart';
