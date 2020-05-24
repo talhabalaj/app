@@ -21,7 +21,7 @@ class AuthServiceError extends Error {
 class AuthService extends ChangeNotifier {
   AuthTokenModel auth;
   UserModel user;
-  FCM fcm;
+  FCM fcm = FCM();
 
   final secureStorage = FlutterSecureStorage();
 
