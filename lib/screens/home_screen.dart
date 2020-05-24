@@ -98,7 +98,8 @@ class _HomeScreenState extends State<HomeScreen> {
             Animation<double> primaryAnimation,
             Animation<double> secondaryAnimation,
           ) =>
-              FadeThroughTransition(
+              SharedAxisTransition(
+            transitionType: SharedAxisTransitionType.vertical,
             child: child,
             animation: primaryAnimation,
             secondaryAnimation: secondaryAnimation,

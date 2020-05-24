@@ -53,9 +53,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: Text(
           widget.user.userName,
         ),
-        shape: RoundedRectangleBorder(
-          side: BorderSide(color: Colors.grey[300]),
-        ),
       ),
       body: loading
           ? ProfilePlaceHolderWigdet()

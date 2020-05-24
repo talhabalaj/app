@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:Moody/components/default_shimmer.dart';
 import 'package:Moody/components/gridview_loading.dart';
 import 'package:Moody/components/loader.dart';
+import 'package:Moody/components/user_list_item.dart';
 import 'package:Moody/helpers/dialogs.dart';
 import 'package:Moody/helpers/navigation.dart';
 import 'package:Moody/models/comment_model.dart';
@@ -19,7 +20,6 @@ import 'package:Moody/services/post_service.dart';
 import 'package:Moody/services/user_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:extended_image/extended_image.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_moment/simple_moment.dart';
@@ -27,8 +27,10 @@ import 'package:toast/toast.dart';
 
 class PostWidget extends StatefulWidget {
   final PostModel post;
+  final bool hasBottomDetails;
 
-  const PostWidget({Key key, this.post}) : super(key: key);
+  const PostWidget({Key key, this.post, this.hasBottomDetails = true})
+      : super(key: key);
 
   @override
   _PostWidgetState createState() => _PostWidgetState();
@@ -139,16 +141,20 @@ class _PostWidgetState extends State<PostWidget> {
                 IconButton(
                   icon: Icon(EvaIcons.messageSquareOutline),
                   iconSize: 30,
-                  onPressed: comment,
+                  onPressed: widget.hasBottomDetails ? comment : null,
                 ),
               ],
             ),
           ),
         ),
-        PostBottomDetails(post: widget.post),
-        SizedBox(
-          height: 30,
+        PostBottomDetails(
+          post: widget.post,
+          hasBottomPart: widget.hasBottomDetails,
         ),
+        if (widget.hasBottomDetails)
+          SizedBox(
+            height: 30,
+          ),
       ],
     );
   }
@@ -172,7 +178,7 @@ class PostTopBar extends StatelessWidget {
         ),
         color: Colors.white,
       ),
-      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -208,6 +214,7 @@ class PostTopBar extends StatelessWidget {
           ),
           if (post.user.sId == loggedInUser.sId)
             PopupMenuButton<String>(
+              icon: Icon(EvaIcons.moreVertical),
               onSelected: (value) async {
                 if (value == 'delete') {
                   bool choice = await showConfirmationDialog(
@@ -240,8 +247,10 @@ class PostTopBar extends StatelessWidget {
 }
 
 class PostBottomDetails extends StatefulWidget {
-  PostBottomDetails({Key key, this.post}) : super(key: key);
+  PostBottomDetails({Key key, this.post, this.hasBottomPart = true})
+      : super(key: key);
   final PostModel post;
+  final bool hasBottomPart;
 
   @override
   _PostBottomDetailsState createState() => _PostBottomDetailsState();
@@ -312,10 +321,11 @@ class _PostBottomDetailsState extends State<PostBottomDetails> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           getLikesDescription(context),
-          if (widget.post.caption != '') PostCaption(post: widget.post),
-          if (widget.post.comments.length > 0)
+          if (widget.post.caption != '' && widget.hasBottomPart)
+            PostCaption(post: widget.post),
+          if (widget.post.comments.length > 0 && widget.hasBottomPart)
             PostCompactComments(post: widget.post),
-          if (widget.post.createdAt != null)
+          if (widget.post.createdAt != null && widget.hasBottomPart)
             Text(
               Moment.fromDate(
                 DateTime.now(),
@@ -356,14 +366,24 @@ class _PostCompactCommentsState extends State<PostCompactComments> {
             text: comment.user.userName,
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          TextSpan(text: " "),
-          TextSpan(text: comment.message),
-          TextSpan(text: '\n'),
+          TextSpan(text: " ${comment.message}"),
         ]);
   }
 
   @override
   Widget build(BuildContext context) {
+    final maxCommentRange =
+        (widget.post.comments.length > 3 ? 3 : widget.post.comments.length);
+    final lessComments = widget.post.comments.reversed
+        .toList()
+        .getRange(
+          0,
+          maxCommentRange,
+        )
+        .toList()
+        .reversed
+        .toList();
+
     return GestureDetector(
       onTap: () {
         gotoPageWithAnimation(
@@ -374,20 +394,16 @@ class _PostCompactCommentsState extends State<PostCompactComments> {
       child: Text.rich(
         TextSpan(
           children: [
-            for (CommentModel comment in widget.post.comments.reversed
-                .toList()
-                .getRange(
-                  0,
-                  (widget.post.comments.length > 3
-                      ? 3
-                      : widget.post.comments.length),
-                )
-                .toList()
-                .reversed)
-              buildComment(comment),
+            for (int idx = 0; idx < lessComments.length; idx++)
+              TextSpan(
+                children: [
+                  buildComment(lessComments[idx]),
+                  if (idx != lessComments.length - 1) TextSpan(text: '\n')
+                ],
+              ),
             if (widget.post.comments.length > 3)
               TextSpan(
-                text: 'View all comments',
+                text: '\nView all comments',
                 style: TextStyle(
                   color: Colors.grey[600],
                 ),
@@ -535,5 +551,28 @@ class _UserPostsState extends State<UserPosts> {
                     ),
                   ),
           );
+  }
+}
+
+class PostWidgetLoading extends StatelessWidget {
+  const PostWidgetLoading({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        UserListItem(user: null, chevron: false),
+        DefaultShimmer(
+          height: MediaQuery.of(context).size.width,
+          width: MediaQuery.of(context).size.width,
+        ),
+        SizedBox(height: 5),
+        Padding(
+          padding: const EdgeInsets.only(left: 20.0),
+          child: DefaultShimmer(width: 75, height: 10),
+        ),
+      ],
+    );
   }
 }

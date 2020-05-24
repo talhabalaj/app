@@ -6,7 +6,6 @@ import 'package:Moody/screens/people_list_screen.dart';
 import 'package:Moody/services/auth_service.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_page_transition/flutter_page_transition.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ProfileWidget extends StatelessWidget {

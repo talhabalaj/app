@@ -1,4 +1,7 @@
+import 'package:Moody/components/default_shimmer.dart';
 import 'package:Moody/components/loader.dart';
+import 'package:Moody/components/post_widget.dart';
+import 'package:Moody/components/user_list_item.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:Moody/components/primary_textfield.dart';
@@ -15,9 +18,11 @@ import 'package:simple_moment/simple_moment.dart';
 import 'package:toast/toast.dart';
 
 class PostCommentsScreen extends StatefulWidget {
-  PostCommentsScreen({Key key, this.postId}) : super(key: key);
+  PostCommentsScreen({Key key, this.postId, this.hasPost = false})
+      : super(key: key);
 
   final String postId;
+  final bool hasPost;
 
   @override
   _PostCommentsScreenState createState() => _PostCommentsScreenState();
@@ -89,66 +94,76 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
         appBar: AppBar(
           title: Text('Comments'),
         ),
-        body: loading
-            ? Loader()
-            : RefreshIndicator(
-                onRefresh: () async {
-                  postService.getPost(widget.postId).then((value) {
-                    if (this.mounted)
-                      this.setState(() {
-                        post = value;
-                      });
-                  });
-                },
-                child: ListView(
-                  children: <Widget>[
+        body: RefreshIndicator(
+          onRefresh: () async {
+            postService.getPost(widget.postId).then((value) {
+              if (this.mounted)
+                this.setState(() {
+                  post = value;
+                });
+            });
+          },
+          child: ListView(
+            children: loading
+                ? [
+                    for (int i = 0; i < 9; i++) PostFullComment(comment: null),
+                  ]
+                : <Widget>[
+                    if (widget.hasPost)
+                      PostWidget(post: post, hasBottomDetails: false),
                     if (post.caption != '')
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 15.0, vertical: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: <Widget>[
-                                CircleAvatar(
-                                  radius: 14,
-                                  backgroundImage: ExtendedNetworkImageProvider(
-                                      post.user.profilePicUrl),
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                      Column(
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 15.0, vertical: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
                                   children: <Widget>[
-                                    Text(
-                                      post.user.userName,
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                    CircleAvatar(
+                                      radius: 14,
+                                      backgroundImage:
+                                          ExtendedNetworkImageProvider(
+                                              post.user.profilePicUrl),
                                     ),
-                                    Text(
-                                      post.caption,
-                                      softWrap: true,
+                                    SizedBox(
+                                      width: 10,
                                     ),
-                                    Text(
-                                      Moment.now().from(
-                                        DateTime.parse(post.createdAt),
-                                      ),
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                      ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Text(
+                                          post.user.userName,
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          post.caption,
+                                          softWrap: true,
+                                        ),
+                                        Text(
+                                          Moment.now().from(
+                                            DateTime.parse(post.createdAt),
+                                          ),
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
                               ],
                             ),
-                          ],
-                        ),
+                          ),
+                          Divider()
+                        ],
                       ),
-                    Divider(),
                     if (post.comments.length == 0)
                       Container(
                         padding: EdgeInsets.all(20),
@@ -156,16 +171,24 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
                         child: Text('No comments on this post.'),
                       ),
                     for (CommentModel comment in post.comments)
-                      PostFullComment(
-                        comment: comment,
+                      Column(
+                        children: [
+                          PostFullComment(
+                            comment: comment,
+                          ),
+                          Divider(
+                            height: 1,
+                            thickness: .5,
+                          ),
+                        ],
                       ),
                     SizedBox(
                       height: 100,
                     ),
                   ],
-                  physics: AlwaysScrollableScrollPhysics(),
-                ),
-              ),
+            physics: AlwaysScrollableScrollPhysics(),
+          ),
+        ),
         bottomSheet: Container(
           decoration: BoxDecoration(
             boxShadow: [BoxShadow(blurRadius: 2, color: Colors.black12)],
@@ -220,8 +243,11 @@ class PostFullComment extends StatelessWidget {
                 children: <Widget>[
                   CircleAvatar(
                     radius: 14,
-                    backgroundImage: ExtendedNetworkImageProvider(
-                        comment.user.profilePicUrl),
+                    backgroundColor: Colors.grey[300],
+                    backgroundImage: comment == null
+                        ? null
+                        : ExtendedNetworkImageProvider(
+                            comment.user.profilePicUrl),
                   ),
                   SizedBox(
                     width: 10,
@@ -229,35 +255,46 @@ class PostFullComment extends StatelessWidget {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          comment.user.userName,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: comment.isProcessing
-                                ? Colors.black45
-                                : Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          comment.message,
-                          style: TextStyle(
-                            color: comment.isProcessing
-                                ? Colors.black45
-                                : Colors.black,
-                          ),
-                        ),
-                        if (!comment.isProcessing)
-                          Text(
-                            Moment.now().from(
-                              DateTime.parse(comment.createdAt),
-                            ),
-                            style: TextStyle(
-                              fontSize: 12,
-                            ),
-                          ),
-                      ],
+                      children: comment == null
+                          ? [
+                              DefaultShimmer(
+                                height: 13,
+                                width: 70,
+                              ),
+                              DefaultShimmer(
+                                height: 15,
+                                width: 100,
+                              ),
+                            ]
+                          : <Widget>[
+                              Text(
+                                comment.user.userName,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: comment.isProcessing
+                                      ? Colors.black45
+                                      : Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                comment.message,
+                                style: TextStyle(
+                                  color: comment.isProcessing
+                                      ? Colors.black45
+                                      : Colors.black,
+                                ),
+                              ),
+                              if (!comment.isProcessing)
+                                Text(
+                                  Moment.now().from(
+                                    DateTime.parse(comment.createdAt),
+                                  ),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                  ),
+                                ),
+                            ],
                     ),
                   ),
                 ],

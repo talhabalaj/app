@@ -32,9 +32,6 @@ class _SearchScreenState extends State<SearchScreen> {
         title: Container(
           child: SearchField(searchService: searchService),
         ),
-        shape: RoundedRectangleBorder(
-          side: BorderSide(color: Colors.grey[300]),
-        ),
       ),
       body: Container(
         child: Column(

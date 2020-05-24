@@ -1,3 +1,4 @@
+import 'package:Moody/components/default_shimmer.dart';
 import 'package:Moody/components/loader.dart';
 import 'package:Moody/helpers/navigation.dart';
 import 'package:Moody/models/m_notification_model.dart';
@@ -36,6 +37,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             context: context,
             page: PostCommentsScreen(
               postId: mNotification.post.sId,
+              hasPost: true,
             ),
           );
         };
@@ -126,11 +128,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
         ),
         centerTitle: true,
         automaticallyImplyLeading: false,
-        shape: RoundedRectangleBorder(
-          side: BorderSide(
-            color: Colors.grey[300],
-          ),
-        ),
       ),
       body: Consumer<NotificationService>(
         builder: (context, notificationService, _) {
@@ -139,19 +136,24 @@ class _NotificationScreenState extends State<NotificationScreen> {
               await notificationService.refreshNotifications();
               await notificationService.markNewUnreadNotificationRead();
             },
-            child: notificationService.notifications.length == 0
-                ? Text('No new notifications')
-                : ListView.separated(
-                    itemBuilder: (context, index) => buildNotification(
-                      notificationService.notifications[index],
-                    ),
-                    physics: AlwaysScrollableScrollPhysics(),
-                    itemCount: notificationService.notifications.length,
-                    separatorBuilder: (context, index) => Divider(
-                      height: 1,
-                      thickness: 1,
-                    ),
-                  ),
+            child: ListView.separated(
+              itemBuilder: (context, index) =>
+                  notificationService.notifications.length == 0 &&
+                          notificationService.loading
+                      ? MNotificationLoading()
+                      : buildNotification(
+                          notificationService.notifications[index],
+                        ),
+              physics: AlwaysScrollableScrollPhysics(),
+              itemCount: notificationService.notifications.length == 0 &&
+                      notificationService.loading
+                  ? 9
+                  : notificationService.notifications.length,
+              separatorBuilder: (context, index) => Divider(
+                height: 1,
+                thickness: 1,
+              ),
+            ),
           );
         },
       ),
@@ -226,6 +228,44 @@ class _NotificationScreenState extends State<NotificationScreen> {
           text: ' has a unknown notification for u, try upating the app.',
         )
       ],
+    );
+  }
+}
+
+class MNotificationLoading extends StatelessWidget {
+  const MNotificationLoading({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 18,
+            backgroundColor: Colors.grey[300],
+          ),
+          SizedBox(width: 5),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              DefaultShimmer(
+                width: 100,
+                height: 11,
+              ),
+              SizedBox(
+                height: 1,
+              ),
+              DefaultShimmer(
+                width: 150,
+                height: 13,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

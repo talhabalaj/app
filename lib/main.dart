@@ -10,6 +10,7 @@ import 'package:Moody/services/notification_service.dart';
 import 'package:Moody/services/post_service.dart';
 import 'package:Moody/services/search_service.dart';
 import 'package:Moody/services/user_service.dart';
+import 'package:animations/animations.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -83,12 +84,22 @@ class _MyAppState extends State<MyApp> {
       initialRoute: SplashScreen.id,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        pageTransitionsTheme: PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: SharedAxisPageTransitionsBuilder(
+              transitionType: SharedAxisTransitionType.horizontal,
+            ),
+            TargetPlatform.iOS: SharedAxisPageTransitionsBuilder(
+              transitionType: SharedAxisTransitionType.horizontal,
+            ),
+          },
+        ),
         accentColor: kPrimaryColor,
         iconTheme: iconThemeData,
         appBarTheme: AppBarTheme(
           color: Colors.white,
           brightness: Brightness.light,
-          elevation: 0,
+          elevation: 1,
           textTheme: textThemeData,
           iconTheme: iconThemeData,
         ),

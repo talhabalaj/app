@@ -10,7 +10,7 @@ class GridViewLoading extends StatelessWidget {
       crossAxisCount: 3,
       shrinkWrap: true,
       children: <Widget>[
-        for (int i = 0; i < 10; i++) DefaultShimmer(),
+        for (int i = 0; i < 9; i++) DefaultShimmer(),
       ],
     );
   }

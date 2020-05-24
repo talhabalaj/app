@@ -35,9 +35,6 @@ class _UserScreenState extends State<UserScreen> {
         title: Text(
           authService.user.userName,
         ),
-        shape: RoundedRectangleBorder(
-          side: BorderSide(color: Colors.grey[300]),
-        ),
         actions: <Widget>[
           if (authService.auth != null)
             IconButton(

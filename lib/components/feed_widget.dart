@@ -47,7 +47,7 @@ class _FeedWidgetState extends State<FeedWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (feedService.feed == null) return Loader();
+    if (feedService.feed == null) return PostWidgetLoading();
 
     final feed = feedService.feed;
 
