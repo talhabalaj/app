@@ -56,6 +56,26 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
     super.dispose();
   }
 
+  Future<void> deleteComment(String commentId) async {
+    final comment =
+        post.comments.firstWhere((element) => element.sId == commentId);
+    this.setState(() {
+      comment.isProcessing = true;
+    });
+    try {
+      await postService.deleteComment(post, commentId);
+      Toast.show('Comment was deleted', context);
+      this.setState(() {
+        post.comments.removeWhere((element) => element.sId == commentId);
+      });
+    } on WebErrorResponse catch (e) {
+      Toast.show(e.message, context);
+      this.setState(() {
+        comment.isProcessing = false;
+      });
+    }
+  }
+
   Future<void> commentOnPost() async {
     String comment = controller.text;
     if (comment != '') {
@@ -175,6 +195,16 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
                         children: [
                           PostFullComment(
                             comment: comment,
+                            onPostDeleteAction:
+                                (post.user.sId == authService.user.sId ||
+                                        (comment.user != null
+                                                ? comment.user.sId
+                                                : comment.userId) ==
+                                            authService.user.sId)
+                                    ? () async {
+                                        await deleteComment(comment.sId);
+                                      }
+                                    : null,
                           ),
                           Divider(
                             height: 1,
@@ -218,20 +248,33 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
   }
 }
 
-class PostFullComment extends StatelessWidget {
+class PostFullComment extends StatefulWidget {
   const PostFullComment({
     Key key,
     @required this.comment,
+    this.onPostDeleteAction,
   }) : super(key: key);
 
   final CommentModel comment;
+  final Function onPostDeleteAction;
 
-  Future<void> deleteComment() {}
+  @override
+  _PostFullCommentState createState() => _PostFullCommentState();
+}
 
+class _PostFullCommentState extends State<PostFullComment> {
   @override
   Widget build(BuildContext context) {
     return Slidable(
       actionPane: SlidableDrawerActionPane(),
+      secondaryActions: <Widget>[
+        if (widget.onPostDeleteAction != null)
+          IconSlideAction(
+            icon: EvaIcons.trash2Outline,
+            foregroundColor: Colors.red,
+            onTap: widget.onPostDeleteAction,
+          )
+      ],
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
         child: Row(
@@ -244,10 +287,10 @@ class PostFullComment extends StatelessWidget {
                   CircleAvatar(
                     radius: 14,
                     backgroundColor: Colors.grey[300],
-                    backgroundImage: comment == null
+                    backgroundImage: widget.comment == null
                         ? null
                         : ExtendedNetworkImageProvider(
-                            comment.user.profilePicUrl),
+                            widget.comment.user.profilePicUrl),
                   ),
                   SizedBox(
                     width: 10,
@@ -255,7 +298,7 @@ class PostFullComment extends StatelessWidget {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: comment == null
+                      children: widget.comment == null
                           ? [
                               DefaultShimmer(
                                 height: 13,
@@ -268,27 +311,27 @@ class PostFullComment extends StatelessWidget {
                             ]
                           : <Widget>[
                               Text(
-                                comment.user.userName,
+                                widget.comment.user.userName,
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: comment.isProcessing
+                                  color: widget.comment.isProcessing
                                       ? Colors.black45
                                       : Colors.black,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               Text(
-                                comment.message,
+                                widget.comment.message,
                                 style: TextStyle(
-                                  color: comment.isProcessing
+                                  color: widget.comment.isProcessing
                                       ? Colors.black45
                                       : Colors.black,
                                 ),
                               ),
-                              if (!comment.isProcessing)
+                              if (!widget.comment.isProcessing)
                                 Text(
                                   Moment.now().from(
-                                    DateTime.parse(comment.createdAt),
+                                    DateTime.parse(widget.comment.createdAt),
                                   ),
                                   style: TextStyle(
                                     fontSize: 12,

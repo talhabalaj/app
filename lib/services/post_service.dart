@@ -62,12 +62,11 @@ class PostService extends ChangeNotifier {
   }
 
   Future<WebResponse<CommentModel>> deleteComment(
-      PostModel post, String comment) async {
-    final formData = {"message": comment};
+      PostModel post, String commentId) async {
     return ApiRequest(authService: authService).request<CommentModel>(
-        '/post/${post.sId}/comment',
-        method: HttpRequestMethod.POST,
-        data: formData);
+      '/post/${post.sId}/comment/$commentId',
+      method: HttpRequestMethod.DELETE,
+    );
   }
 
   PostService update(AuthService authService) {
