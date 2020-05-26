@@ -21,6 +21,7 @@ class AuthServiceError extends Error {
 class AuthService extends ChangeNotifier {
   AuthTokenModel auth;
   UserModel user;
+  Timer userRefresher;
   FCM fcm = FCM();
 
   final secureStorage = FlutterSecureStorage();
@@ -32,7 +33,7 @@ class AuthService extends ChangeNotifier {
             .request<UserModel>('/user/profile'))
         .data;
 
-    final timer = Timer(Duration(seconds: 10), () {
+    userRefresher = Timer(Duration(seconds: 10), () {
       print("Updating user!");
       refreshUser();
     });
@@ -115,8 +116,9 @@ class AuthService extends ChangeNotifier {
 
     auth = null;
     user = null;
-
     fcm.unsubscribe();
+    userRefresher.cancel();
+
     notifyListeners();
     await secureStorage.delete(key: 'token');
   }

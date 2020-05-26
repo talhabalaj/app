@@ -5,17 +5,15 @@ import 'package:Moody/screens/profile_screen.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
 class UserListItem extends StatelessWidget {
-  const UserListItem({
-    Key key,
-    @required this.user,
-    this.chevron = true,
-  }) : super(key: key);
+  const UserListItem(
+      {Key key, @required this.user, this.chevron = true, this.onTap})
+      : super(key: key);
 
   final bool chevron;
   final UserModel user;
+  final Function onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -24,14 +22,18 @@ class UserListItem extends StatelessWidget {
     return FlatButton(
       onPressed: userExists
           ? () {
-              FocusScope.of(context).unfocus();
-              gotoPageWithAnimation(
-                context: context,
-                page: ProfileScreen(user: user),
-              );
+              if (onTap == null) {
+                FocusScope.of(context).unfocus();
+                gotoPageWithAnimation(
+                  context: context,
+                  page: ProfileScreen(user: user),
+                );
+              } else {
+                onTap();
+              }
             }
           : null,
-      padding: EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

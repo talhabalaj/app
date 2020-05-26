@@ -1,6 +1,8 @@
 import 'package:Moody/models/comment_model.dart';
+import 'package:Moody/models/conversation_model.dart';
 import 'package:Moody/models/feed_model.dart';
 import 'package:Moody/models/m_notification_model.dart';
+import 'package:Moody/models/message_model.dart';
 import 'package:Moody/models/post_model.dart';
 import 'package:Moody/models/user_model.dart';
 import 'package:flutter/widgets.dart';
@@ -27,6 +29,10 @@ class WebResponse<T> {
         data = PostModel.fromJson(json['data']['post']) as T;
       } else if (T == CommentModel) {
         data = CommentModel.fromJson(json['data']['comment']) as T;
+      } else if (T == ConversationModel) {
+        data = ConversationModel.fromJson(json['data']['conversation']) as T;
+      } else if (T == MessageModel) {
+        data = MessageModel.fromJson(json['data']['message']) as T;
       } else if (T == Map) {
         data = json['data'];
       } else if (isSubtype<T, List<UserModel>>()) {
@@ -34,6 +40,20 @@ class WebResponse<T> {
         var list = data as List;
         if (json['data']['users'] != null) {
           json['data']['users'].forEach((v) => list.add(UserModel.fromJson(v)));
+        }
+      } else if (isSubtype<T, List<ConversationModel>>()) {
+        data = new List<ConversationModel>() as T;
+        var list = data as List;
+        if (json['data']['conversations'] != null) {
+          json['data']['conversations']
+              .forEach((v) => list.add(ConversationModel.fromJson(v)));
+        }
+      } else if (isSubtype<T, List<MessageModel>>()) {
+        data = new List<MessageModel>() as T;
+        var list = data as List;
+        if (json['data']['messages'] != null) {
+          json['data']['messages']
+              .forEach((v) => list.add(MessageModel.fromJson(v)));
         }
       } else if (isSubtype<T, List<PostModel>>()) {
         data = new List<PostModel>() as T;

@@ -14,6 +14,8 @@ class NotificationService extends ChangeNotifier {
     this.authService = authService;
     if (this.authService.user != null) {
       refreshNotifications();
+    } else {
+      notifications = null;
     }
     return this;
   }

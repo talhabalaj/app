@@ -25,7 +25,7 @@ class CommentModel {
 
   CommentModel.fromJson(Map<String, dynamic> json) {
     if (json['replies'] != null) {
-      replies = new List<Null>();
+      replies = new List<CommentModel>();
       json['replies'].forEach((v) {
         replies.add(new CommentModel.fromJson(v));
       });

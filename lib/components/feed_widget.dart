@@ -47,7 +47,16 @@ class _FeedWidgetState extends State<FeedWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (feedService.feed == null) return PostWidgetLoading();
+    if (feedService.feed == null)
+      return ListView(
+        children: <Widget>[
+          PostWidgetLoading(),
+          SizedBox(
+            height: 30,
+          ),
+          PostWidgetLoading(),
+        ],
+      );
 
     final feed = feedService.feed;
 

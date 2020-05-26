@@ -14,15 +14,18 @@ import 'package:Moody/services/post_service.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:simple_moment/simple_moment.dart';
 import 'package:toast/toast.dart';
 
 class PostCommentsScreen extends StatefulWidget {
-  PostCommentsScreen({Key key, this.postId, this.hasPost = false})
+  PostCommentsScreen(
+      {Key key, this.postId, this.hasPost = false, this.focusedCommentId})
       : super(key: key);
 
   final String postId;
   final bool hasPost;
+  final String focusedCommentId;
 
   @override
   _PostCommentsScreenState createState() => _PostCommentsScreenState();
@@ -32,12 +35,15 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
   PostService postService;
   AuthService authService;
   TextEditingController controller;
+  ScrollController scrollController;
+  AutoScrollController autoScrollController = AutoScrollController();
   bool loading = true;
   PostModel post;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    scrollController = ScrollController();
     postService = Provider.of<PostService>(context, listen: false);
     authService = Provider.of<AuthService>(context, listen: false);
     controller = TextEditingController();
@@ -47,12 +53,22 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
           post = value;
           loading = false;
         });
+      if (widget.focusedCommentId != null)
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+          int index = post.comments
+              .indexWhere((element) => element.sId == widget.focusedCommentId);
+          await autoScrollController.scrollToIndex(index + 1,
+              preferPosition: AutoScrollPosition.begin);
+          autoScrollController.highlight(index);
+        });
     });
   }
 
   @override
   void dispose() {
     controller.dispose();
+    scrollController.dispose();
+    autoScrollController.dispose();
     super.dispose();
   }
 
@@ -123,99 +139,120 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
                 });
             });
           },
-          child: ListView(
-            children: loading
-                ? [
-                    for (int i = 0; i < 9; i++) PostFullComment(comment: null),
-                  ]
-                : <Widget>[
-                    if (widget.hasPost)
-                      PostWidget(post: post, hasBottomDetails: false),
-                    if (post.caption != '')
-                      Column(
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 15.0, vertical: 10),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: <Widget>[
-                                    CircleAvatar(
-                                      radius: 14,
-                                      backgroundImage:
-                                          ExtendedNetworkImageProvider(
-                                              post.user.profilePicUrl),
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        Text(
-                                          post.user.userName,
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.bold,
+          child: SingleChildScrollView(
+            controller: autoScrollController,
+            child: Column(
+              children: loading
+                  ? [
+                      if (widget.hasPost) PostWidgetLoading(),
+                      for (int i = 0; i < 9; i++)
+                        Opacity(
+                          opacity: (9 - i) / 9 > 0 ? (9 - i) / 9 : 0,
+                          child: PostFullComment(comment: null),
+                        ),
+                    ]
+                  : <Widget>[
+                      if (widget.hasPost)
+                        PostWidget(post: post, hasBottomDetails: false),
+                      if (post.caption != '')
+                        Column(
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 15.0, vertical: 10),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: <Widget>[
+                                      CircleAvatar(
+                                        radius: 14,
+                                        backgroundImage:
+                                            ExtendedNetworkImageProvider(
+                                                post.user.profilePicUrl),
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Text(
+                                            post.user.userName,
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
-                                        ),
-                                        Text(
-                                          post.caption,
-                                          softWrap: true,
-                                        ),
-                                        Text(
-                                          Moment.now().from(
-                                            DateTime.parse(post.createdAt),
+                                          Text(
+                                            post.caption,
+                                            softWrap: true,
                                           ),
-                                          style: TextStyle(
-                                            fontSize: 12,
+                                          Text(
+                                            Moment.now().from(
+                                              DateTime.parse(post.createdAt),
+                                            ),
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          Divider()
-                        ],
-                      ),
-                    if (post.comments.length == 0)
-                      Container(
-                        padding: EdgeInsets.all(20),
-                        alignment: Alignment.center,
-                        child: Text('No comments on this post.'),
-                      ),
-                    for (CommentModel comment in post.comments)
-                      Column(
-                        children: [
-                          PostFullComment(
-                            comment: comment,
-                            onPostDeleteAction:
-                                (post.user.sId == authService.user.sId ||
-                                        (comment.user != null
-                                                ? comment.user.sId
-                                                : comment.userId) ==
+                            Divider()
+                          ],
+                        ),
+                      if (post.comments.length == 0)
+                        Container(
+                          padding: EdgeInsets.all(20),
+                          alignment: Alignment.center,
+                          child: Text('No comments on this post.'),
+                        ),
+                      for (int i = 0; i < post.comments.length; i++)
+                        Column(
+                          children: [
+                            AutoScrollTag(
+                              key: ValueKey(i),
+                              controller: autoScrollController,
+                              index: i,
+                              highlightColor: Colors.grey[300],
+                              child: PostFullComment(
+                                comment: post.comments[i],
+                                onPostDeleteAction: (post.user.sId ==
+                                            authService.user.sId ||
+                                        (post.comments[i].user != null
+                                                ? post.comments[i].user.sId
+                                                : post.comments[i].userId) ==
                                             authService.user.sId)
                                     ? () async {
-                                        await deleteComment(comment.sId);
+                                        await deleteComment(
+                                            post.comments[i].sId);
                                       }
                                     : null,
-                          ),
-                          Divider(
-                            height: 1,
-                            thickness: .5,
-                          ),
-                        ],
+                              ),
+                            ),
+                            Divider(
+                              height: 1,
+                              thickness: .5,
+                            ),
+                          ],
+                        ),
+                      AutoScrollTag(
+                        key: ValueKey(post.comments.length),
+                        controller: autoScrollController,
+                        index: post.comments.length,
+                        child: SizedBox(
+                          height: 100,
+                        ),
                       ),
-                    SizedBox(
-                      height: 100,
-                    ),
-                  ],
+                    ],
+            ),
             physics: AlwaysScrollableScrollPhysics(),
           ),
         ),

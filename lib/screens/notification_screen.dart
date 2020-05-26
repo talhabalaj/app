@@ -27,7 +27,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
       case UserNotificationType.POST_LIKED:
         richText = likeNotificationText(mNotification);
         browseNotification = () {
-          //gotoPageWithAnimation(context: context, page: PostScreen(post: ,));
+          gotoPageWithAnimation(
+              context: context,
+              page: PostCommentsScreen(
+                postId: mNotification.post.sId,
+                hasPost: true,
+              ));
         };
         break;
       case UserNotificationType.POST_COMMENTED:
@@ -38,6 +43,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             page: PostCommentsScreen(
               postId: mNotification.post.sId,
               hasPost: true,
+              focusedCommentId: mNotification.comment.sId,
             ),
           );
         };
