@@ -30,6 +30,7 @@ class _SearchScreenState extends State<SearchScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Container(
+          height: 55,
           child: SearchField(searchService: searchService),
         ),
       ),

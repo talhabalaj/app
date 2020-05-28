@@ -2,6 +2,8 @@ import 'package:Moody/components/default_shimmer.dart';
 import 'package:Moody/components/loader.dart';
 import 'package:Moody/components/post_widget.dart';
 import 'package:Moody/components/user_list_item.dart';
+import 'package:Moody/constants.dart';
+import 'package:Moody/helpers/emoji_text.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:Moody/components/primary_textfield.dart';
@@ -128,7 +130,7 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Comments'),
+          title: Text(widget.focusedCommentId != null ? 'Comments' : 'Post'),
         ),
         body: RefreshIndicator(
           onRefresh: () async {
@@ -186,8 +188,10 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
-                                          Text(
-                                            post.caption,
+                                          Text.rich(
+                                            buildTextSpansWithEmojiSupport(
+                                              post.caption,
+                                            ),
                                             softWrap: true,
                                           ),
                                           Text(
@@ -265,16 +269,33 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
           child: Row(
             children: <Widget>[
               Expanded(
+                flex: 6,
                 child: PrimaryStyleTextField(
                   controller: controller,
+                  hasBorder: true,
                   hintText: 'Write a comment',
                 ),
               ),
-              IconButton(
-                icon: Icon(Icons.send),
-                onPressed: () {
-                  commentOnPost();
-                },
+              Expanded(
+                flex: 1,
+                child: RaisedButton(
+                  shape: CircleBorder(
+                    side: BorderSide(
+                      color: Colors.grey[300],
+                      width: 1,
+                    ),
+                  ),
+                  disabledColor: Colors.grey[100],
+                  textColor: Colors.white,
+                  color: kPrimaryColor,
+                  child: Icon(
+                    Icons.send,
+                    size: 15,
+                  ),
+                  onPressed: () {
+                    commentOnPost();
+                  },
+                ),
               )
             ],
           ),
@@ -357,12 +378,14 @@ class _PostFullCommentState extends State<PostFullComment> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Text(
-                                widget.comment.message,
-                                style: TextStyle(
-                                  color: widget.comment.isProcessing
-                                      ? Colors.black45
-                                      : Colors.black,
+                              Text.rich(
+                                buildTextSpansWithEmojiSupport(
+                                  widget.comment.message,
+                                  style: TextStyle(
+                                    color: widget.comment.isProcessing
+                                        ? Colors.black45
+                                        : Colors.black,
+                                  ),
                                 ),
                               ),
                               if (!widget.comment.isProcessing)

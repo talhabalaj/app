@@ -9,6 +9,7 @@ class PrimaryStyleTextField extends StatelessWidget {
       this.suffixIcon,
       this.autofocus = false,
       this.prefixIcon,
+      this.hasBorder = false,
       this.hintText = 'Text'})
       : super(key: key);
 
@@ -17,6 +18,7 @@ class PrimaryStyleTextField extends StatelessWidget {
   final String hintText;
   final Widget suffixIcon;
   final bool autofocus;
+  final bool hasBorder;
   final Widget prefixIcon;
 
   @override
@@ -27,13 +29,14 @@ class PrimaryStyleTextField extends StatelessWidget {
       onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hintText,
-        contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
+        contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide:
+              hasBorder ? BorderSide(color: Colors.grey[300]) : BorderSide.none,
+        ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(9),
-          borderSide: BorderSide(
-            style: BorderStyle.none,
-            width: 0,
-          ),
+          borderRadius: BorderRadius.circular(20),
         ),
         filled: true,
         prefixIcon: prefixIcon,
@@ -41,7 +44,6 @@ class PrimaryStyleTextField extends StatelessWidget {
         fillColor: Color(0xffEBEBEB),
         hintStyle: TextStyle(
           color: Color(0xff878787),
-          fontSize: 15,
         ),
         focusColor: Colors.red,
       ),

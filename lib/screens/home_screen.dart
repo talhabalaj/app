@@ -1,16 +1,23 @@
 import 'package:Moody/helpers/dialogs.dart';
+import 'package:Moody/helpers/navigation.dart';
 import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/models/post_model.dart';
+import 'package:Moody/models/user_model.dart';
 import 'package:Moody/screens/edit_image_screen.dart';
 import 'package:Moody/screens/feed_screen.dart';
+import 'package:Moody/screens/messages_screen.dart';
 import 'package:Moody/screens/notification_screen.dart';
+import 'package:Moody/screens/post_comments_screen.dart';
+import 'package:Moody/screens/profile_screen.dart';
 import 'package:Moody/screens/search_screen.dart';
 import 'package:Moody/screens/user_screen.dart';
 import 'package:Moody/services/auth_service.dart';
+import 'package:Moody/services/fcm_service.dart';
 import 'package:Moody/services/feed_service.dart';
 import 'package:Moody/services/notification_service.dart';
 import 'package:animations/animations.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -23,101 +30,173 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int index = 0;
+  PageController pageController;
+  List<Widget> tabs;
+  FirebaseMessaging fcm;
+  bool isFCMConfigured = false;
 
-  List<Widget> tabs = [
-    FeedScreen(),
-    SearchScreen(),
-    NotificationScreen(),
-    UserScreen(),
-  ];
+  void gotoMessageScreen() {
+    pageController.animateToPage(1,
+        duration: Duration(milliseconds: 500), curve: Curves.ease);
+  }
+
+  void goBackFromMessagesScreen() {
+    pageController.animateToPage(0,
+        duration: Duration(milliseconds: 500), curve: Curves.ease);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    pageController = PageController();
+    tabs = [
+      FeedScreen(
+        onMessageButtonClick: gotoMessageScreen,
+      ),
+      SearchScreen(),
+      NotificationScreen(),
+      UserScreen(),
+    ];
+  }
+
+  Future<void> notificationHandler(Map<String, dynamic> msg) async {
+    print('onLaunch/onResume: $msg');
+    if (msg['data']['conversation_id'] != null) {
+      this.gotoMessageScreen();
+    } else if (msg['data']['comment_id'] != null &&
+        msg['data']['post_id'] != null) {
+      final String commentId = msg['data']['comment_id'];
+      final String postId = msg['data']['post_id'];
+      gotoPageWithAnimation(
+        context: context,
+        page: PostCommentsScreen(
+          focusedCommentId: commentId,
+          postId: postId,
+          hasPost: true,
+        ),
+      );
+    } else if (msg['data']['post_id'] != null) {
+      final String postId = msg['data']['post_id'];
+      gotoPageWithAnimation(
+        context: context,
+        page: PostCommentsScreen(
+          postId: postId,
+          hasPost: true,
+        ),
+      );
+    } else if (msg['data']['user_id'] != null) {
+      final String userId = msg['data']['user_id'];
+      gotoPageWithAnimation(
+        context: context,
+        page: ProfileScreen(
+          user: UserModel(
+            sId: userId,
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    fcm = Provider.of<AuthService>(context, listen: false).fcm.fcm;
+    if (!isFCMConfigured) {
+      fcm.configure(
+        onMessage: (message) async {
+          // forground!
+        },
+        onLaunch: notificationHandler,
+        onResume: notificationHandler,
+      );
+      isFCMConfigured = true;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final notificationService = Provider.of<NotificationService>(context);
 
     return SafeArea(
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            final image =
-                await ImagePicker.pickImage(source: ImageSource.gallery);
+      child: PageView(controller: pageController, children: [
+        Scaffold(
+          resizeToAvoidBottomInset: false,
+          floatingActionButton: FloatingActionButton(
+            onPressed: () async {
+              final image =
+                  await ImagePicker.pickImage(source: ImageSource.gallery);
 
-            if (image != null) {
-              final imageEdited = await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => EditImageScreen(image: image),
-                ),
-              );
-
-              if (imageEdited != null) {
-                this.setState(() {
-                  index = 0;
-                });
-                final controller = TextEditingController();
-
-                await showDialog<String>(
-                  context: context,
-                  builder: (context) => SimpleDialog(
-                    title: Text("Add Caption"),
-                    children: <Widget>[
-                      TextField(
-                        controller: controller,
-                      ),
-                      FlatButton(
-                        child: Text("Done"),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
+              if (image != null) {
+                final imageEdited = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => EditImageScreen(image: image),
                   ),
                 );
 
-                String caption = controller.text;
-                final createPost = PostModel.inMemory(
-                  image: imageEdited,
-                  caption: caption,
-                  user: Provider.of<AuthService>(context, listen: false).user,
-                );
-                try {
-                  await Provider.of<FeedService>(context, listen: false)
-                      .createPost(createPost);
-                } on WebErrorResponse catch (e) {
-                  showErrorDialog(context: context, e: e);
+                if (imageEdited != null) {
+                  this.setState(() {
+                    index = 0;
+                  });
+                  final controller = TextEditingController();
+
+                  await showDialog<String>(
+                    context: context,
+                    builder: (context) => SimpleDialog(
+                      title: Text("Add Caption"),
+                      children: <Widget>[
+                        TextField(
+                          controller: controller,
+                        ),
+                        FlatButton(
+                          child: Text("Done"),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+
+                  String caption = controller.text;
+                  final createPost = PostModel.inMemory(
+                    image: imageEdited,
+                    caption: caption,
+                    user: Provider.of<AuthService>(context, listen: false).user,
+                  );
+                  try {
+                    await Provider.of<FeedService>(context, listen: false)
+                        .createPost(createPost);
+                  } on WebErrorResponse catch (e) {
+                    showErrorDialog(context: context, e: e);
+                  }
                 }
               }
-            }
-          },
-          child: Icon(EvaIcons.plus),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        body: PageTransitionSwitcher(
-          transitionBuilder: (
-            Widget child,
-            Animation<double> primaryAnimation,
-            Animation<double> secondaryAnimation,
-          ) =>
-              SharedAxisTransition(
-            transitionType: SharedAxisTransitionType.vertical,
-            child: child,
-            animation: primaryAnimation,
-            secondaryAnimation: secondaryAnimation,
+            },
+            child: Icon(EvaIcons.plus),
           ),
-          child: tabs[index],
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
+          body: IndexedStack(
+            children: tabs,
+            index: index,
+          ),
+          bottomNavigationBar: StyledBottomNav(
+            index: index,
+            newUnreadNotificationCount:
+                notificationService.newUnreadNotificationCount,
+            onTap: (i) {
+              this.setState(() {
+                index = i;
+              });
+              if (index == 2)
+                notificationService.markNewUnreadNotificationRead();
+            },
+          ),
         ),
-        bottomNavigationBar: StyledBottomNav(
-          index: index,
-          newUnreadNotificationCount:
-              notificationService.newUnreadNotificationCount,
-          onTap: (i) {
-            this.setState(() {
-              index = i;
-            });
-            if (index == 2) notificationService.markNewUnreadNotificationRead();
-          },
-        ),
-      ),
+        MessagesScreen(
+          onBack: this.goBackFromMessagesScreen,
+        )
+      ]),
     );
   }
 }

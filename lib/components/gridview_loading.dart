@@ -9,6 +9,10 @@ class GridViewLoading extends StatelessWidget {
     return GridView.count(
       crossAxisCount: 3,
       shrinkWrap: true,
+      mainAxisSpacing: 2,
+      crossAxisSpacing: 2,
+      childAspectRatio: 1 / 1,
+      physics: BouncingScrollPhysics(),
       children: <Widget>[
         for (int i = 0; i < 9; i++) DefaultShimmer(),
       ],

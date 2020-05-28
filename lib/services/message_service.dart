@@ -46,4 +46,11 @@ class MessageService extends ChangeNotifier {
             .request<ConversationModel>('/messages/init/$userId'))
         .data;
   }
+
+  void updateConversation(String conversationId, List<MessageModel> messages) {
+    conversations
+        .firstWhere((element) => element.sId == conversationId)
+        .messages = messages;
+    notifyListeners();
+  }
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:Moody/components/loader.dart';
 import 'package:Moody/components/post_widget.dart';
 import 'package:Moody/helpers/dialogs.dart';
@@ -18,26 +20,36 @@ class FeedWidget extends StatefulWidget {
 class _FeedWidgetState extends State<FeedWidget> {
   FeedService feedService;
   int indexRequested = 0;
+  ScrollController controller;
+  Timer timer;
+
+  GlobalKey<RefreshIndicatorState> refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
 
   @override
   void initState() {
     feedService = widget.feedService;
+    controller = ScrollController();
+    timer = Timer.periodic(Duration(minutes: 1), (timer) {
+      if (controller.hasClients) {
+        if (controller.offset < 100) {
+          refreshIndicatorKey.currentState.show();
+        }
+      }
+    });
+
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   Future<void> refreshFeed() async {
     try {
       await feedService.refreshFeed();
-    } on WebErrorResponse catch (e) {
-      showErrorDialog(context: context, e: e);
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  Future<void> initFeed() async {
-    try {
-      await feedService.initFeed();
     } on WebErrorResponse catch (e) {
       showErrorDialog(context: context, e: e);
     } catch (e) {
@@ -61,10 +73,12 @@ class _FeedWidgetState extends State<FeedWidget> {
     final feed = feedService.feed;
 
     return RefreshIndicator(
+      key: refreshIndicatorKey,
       onRefresh: () async {
         await refreshFeed();
       },
       child: ListView.builder(
+        controller: controller,
         physics: AlwaysScrollableScrollPhysics(),
         itemBuilder: (context, index) {
           if (index < feed.posts.length) {

@@ -1,5 +1,6 @@
 import 'package:Moody/components/default_shimmer.dart';
 import 'package:Moody/components/loader.dart';
+import 'package:Moody/helpers/emoji_text.dart';
 import 'package:Moody/helpers/navigation.dart';
 import 'package:Moody/models/m_notification_model.dart';
 import 'package:Moody/screens/post_comments_screen.dart';
@@ -198,9 +199,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             ),
           ],
         ),
-        TextSpan(
-          text: '"${mNotification.comment.message}"',
-        ),
+        buildTextSpansWithEmojiSupport('"${mNotification.comment.message}"')
       ],
     );
   }

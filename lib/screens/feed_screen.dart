@@ -7,6 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class FeedScreen extends StatefulWidget {
+  FeedScreen({Key key, this.onMessageButtonClick}) : super(key: key);
+
+  Function onMessageButtonClick;
+
   @override
   _FeedScreenState createState() => _FeedScreenState();
 }
@@ -28,12 +32,7 @@ class _FeedScreenState extends State<FeedScreen> {
         actions: <Widget>[
           IconButton(
             icon: Icon(EvaIcons.messageCircleOutline),
-            onPressed: () {
-              gotoPageWithAnimation(
-                context: context,
-                page: MessagesScreen(),
-              );
-            },
+            onPressed: widget.onMessageButtonClick,
           ),
         ],
       ),

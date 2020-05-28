@@ -51,7 +51,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          widget.user.userName,
+          widget.user.userName != null
+              ? widget.user.userName
+              : (user != null ? user.userName : 'Loading'),
         ),
       ),
       body: loading

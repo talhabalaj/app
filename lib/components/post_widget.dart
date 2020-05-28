@@ -5,6 +5,7 @@ import 'package:Moody/components/gridview_loading.dart';
 import 'package:Moody/components/loader.dart';
 import 'package:Moody/components/user_list_item.dart';
 import 'package:Moody/helpers/dialogs.dart';
+import 'package:Moody/helpers/emoji_text.dart';
 import 'package:Moody/helpers/navigation.dart';
 import 'package:Moody/models/comment_model.dart';
 import 'package:Moody/models/error_response_model.dart';
@@ -358,16 +359,18 @@ class PostCompactComments extends StatefulWidget {
 class _PostCompactCommentsState extends State<PostCompactComments> {
   TextSpan buildComment(CommentModel comment) {
     return TextSpan(
-        style: TextStyle(
-          color: comment.isProcessing ? Colors.black45 : Colors.black,
+      style: TextStyle(
+        color: comment.isProcessing ? Colors.black45 : Colors.black,
+      ),
+      children: [
+        TextSpan(
+          text: comment.user.userName,
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        children: [
-          TextSpan(
-            text: comment.user.userName,
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          TextSpan(text: " ${comment.message}"),
-        ]);
+        TextSpan(text: " "),
+        buildTextSpansWithEmojiSupport(comment.message),
+      ],
+    );
   }
 
   @override
@@ -434,7 +437,7 @@ class PostCaption extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             TextSpan(text: " "),
-            TextSpan(text: post.caption),
+            buildTextSpansWithEmojiSupport(post.caption),
           ]),
         ],
       ),
