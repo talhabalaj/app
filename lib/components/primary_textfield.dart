@@ -1,5 +1,6 @@
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class PrimaryStyleTextField extends StatelessWidget {
   const PrimaryStyleTextField(
@@ -10,6 +11,8 @@ class PrimaryStyleTextField extends StatelessWidget {
       this.autofocus = false,
       this.prefixIcon,
       this.hasBorder = false,
+      this.onTap,
+      this.maxLines,
       this.hintText = 'Text'})
       : super(key: key);
 
@@ -19,17 +22,21 @@ class PrimaryStyleTextField extends StatelessWidget {
   final Widget suffixIcon;
   final bool autofocus;
   final bool hasBorder;
+  final Function onTap;
   final Widget prefixIcon;
+  final int maxLines;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
       autofocus: autofocus,
+      onTap: onTap,
+      style: TextStyle(fontFamily: 'joypixels'),
       onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hintText,
-        contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
+        contentPadding: EdgeInsets.symmetric(vertical: 2, horizontal: 15),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
           borderSide:
@@ -47,7 +54,7 @@ class PrimaryStyleTextField extends StatelessWidget {
         ),
         focusColor: Colors.red,
       ),
-      maxLines: 1,
+      maxLines: maxLines,
       expands: false,
     );
   }
