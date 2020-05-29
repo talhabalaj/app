@@ -1,11 +1,9 @@
-import 'package:Moody/components/loader.dart';
 import 'package:Moody/components/post_widget.dart';
 import 'package:Moody/components/primary_button.dart';
 import 'package:Moody/components/profile_widget.dart';
 import 'package:Moody/models/user_model.dart';
 import 'package:Moody/services/user_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {

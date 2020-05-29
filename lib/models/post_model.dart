@@ -40,7 +40,7 @@ class PostModel {
         json['comments'].forEach((v) {
           comments.add(new CommentModel.fromJson(v));
         });
-      } on TypeError catch (e) {
+      } on TypeError catch (_) {
         comments = null;
       }
     }
@@ -48,7 +48,7 @@ class PostModel {
     imageUrl = json['imageUrl'];
     try {
       user = UserModel.fromJson(json['user']);
-    } on TypeError catch (e) {
+    } on TypeError catch (_) {
       user = UserModel(sId: json['user']);
     }
     createdAt = json['createdAt'];

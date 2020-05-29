@@ -1,10 +1,8 @@
 import 'package:Moody/components/default_shimmer.dart';
-import 'package:Moody/components/loader.dart';
 import 'package:Moody/helpers/emoji_text.dart';
 import 'package:Moody/helpers/navigation.dart';
 import 'package:Moody/models/m_notification_model.dart';
 import 'package:Moody/screens/post_comments_screen.dart';
-import 'package:Moody/screens/post_screen.dart';
 import 'package:Moody/screens/profile_screen.dart';
 import 'package:Moody/services/notification_service.dart';
 import 'package:extended_image/extended_image.dart';

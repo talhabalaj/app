@@ -12,10 +12,8 @@ import 'package:Moody/screens/profile_screen.dart';
 import 'package:Moody/screens/search_screen.dart';
 import 'package:Moody/screens/user_screen.dart';
 import 'package:Moody/services/auth_service.dart';
-import 'package:Moody/services/fcm_service.dart';
 import 'package:Moody/services/feed_service.dart';
 import 'package:Moody/services/notification_service.dart';
-import 'package:animations/animations.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -205,7 +203,7 @@ class StyledBottomNav extends StatelessWidget {
   final int index;
   final Function(int) onTap;
   final int newUnreadNotificationCount;
-  String newUnreadNotificationString;
+  final String newUnreadNotificationString;
 
   final List<Icon> leftIcons = [
     Icon(EvaIcons.homeOutline),

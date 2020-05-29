@@ -88,7 +88,7 @@ class AuthService extends ChangeNotifier {
       String firstName,
       String lastName,
       String email}) async {
-    final res = await http.post(
+    await http.post(
       '$kApiUrl/user/register',
       headers: {
         "Content-Type": "application/json",
@@ -137,10 +137,6 @@ class AuthService extends ChangeNotifier {
     } else {
       throw AuthServiceError("Not logged in");
     }
-  }
-
-  Future<void> refresh() {
-    // TODO: implement
   }
 
   @override

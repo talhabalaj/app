@@ -16,7 +16,6 @@ class CreateConversationScreen extends StatefulWidget {
 }
 
 class _CreateConversationScreenState extends State<CreateConversationScreen> {
-  TextEditingController _controller = TextEditingController();
   bool loading = false;
 
   @override

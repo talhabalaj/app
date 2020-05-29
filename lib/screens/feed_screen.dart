@@ -1,6 +1,4 @@
 import 'package:Moody/components/feed_widget.dart';
-import 'package:Moody/helpers/navigation.dart';
-import 'package:Moody/screens/messages_screen.dart';
 import 'package:Moody/services/feed_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +7,7 @@ import 'package:provider/provider.dart';
 class FeedScreen extends StatefulWidget {
   FeedScreen({Key key, this.onMessageButtonClick}) : super(key: key);
 
-  Function onMessageButtonClick;
+  final Function onMessageButtonClick;
 
   @override
   _FeedScreenState createState() => _FeedScreenState();

@@ -1,13 +1,10 @@
-import 'package:Moody/components/loader.dart';
 import 'package:Moody/components/primary_textfield.dart';
 import 'package:Moody/components/user_list_item.dart';
 import 'package:Moody/helpers/dialogs.dart';
 import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/services/search_service.dart';
-import 'package:dio/dio.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 
 class SearchScreen extends StatefulWidget {

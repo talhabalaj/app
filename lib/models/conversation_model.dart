@@ -17,7 +17,7 @@ class ConversationModel {
         json['members'].forEach((v) {
           members.add(UserModel.fromJson(v));
         });
-      } on TypeError catch (e) {
+      } on TypeError catch (_) {
         print('[ConversationModel] memebers were not populated');
       }
     }
@@ -27,7 +27,7 @@ class ConversationModel {
         json['messages'].forEach((v) {
           messages.add(MessageModel.fromJson(v));
         });
-      } on TypeError catch (e) {
+      } on TypeError catch (_) {
         print('[ConversationModel] messages were not populated');
       }
     }

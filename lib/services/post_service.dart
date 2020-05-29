@@ -1,15 +1,11 @@
 import 'dart:developer';
 
 import 'package:Moody/helpers/authed_request.dart';
-import 'package:Moody/helpers/random.dart';
 import 'package:Moody/models/api_response_model.dart';
 import 'package:Moody/models/comment_model.dart';
-import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/services/auth_service.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:Moody/models/post_model.dart';
-import 'package:toast/toast.dart';
 
 class PostService extends ChangeNotifier {
   AuthService authService;

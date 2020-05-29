@@ -1,4 +1,3 @@
-import 'package:Moody/components/primary_textfield.dart';
 import 'package:Moody/components/user_list_item.dart';
 import 'package:Moody/helpers/emoji_text.dart';
 import 'package:Moody/helpers/navigation.dart';
@@ -6,7 +5,6 @@ import 'package:Moody/models/conversation_model.dart';
 import 'package:Moody/models/user_model.dart';
 import 'package:Moody/screens/conversation_screen.dart';
 import 'package:Moody/screens/create_convo_screen.dart';
-import 'package:Moody/screens/search_screen.dart';
 import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/message_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
@@ -17,7 +15,7 @@ import 'package:provider/provider.dart';
 class MessagesScreen extends StatefulWidget {
   MessagesScreen({Key key, this.onBack}) : super(key: key);
 
-  Function onBack;
+  final Function onBack;
 
   @override
   _MessagesScreenState createState() => _MessagesScreenState();

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 TextSpan buildTextSpansWithEmojiSupport(String text, {TextStyle style}) {
   if (style == null) {

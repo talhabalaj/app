@@ -42,7 +42,7 @@ class UserService extends ChangeNotifier {
     if (firstName != null) fieldsToUpdate['firstName'] = firstName;
     if (lastName != null) fieldsToUpdate['lastName'] = lastName;
 
-    final res = await ApiRequest(authService: authService).request(
+    await ApiRequest(authService: authService).request(
       '/user/profile',
       data: jsonEncode(fieldsToUpdate),
       method: HttpRequestMethod.PUT,

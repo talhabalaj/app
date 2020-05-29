@@ -2,8 +2,6 @@ import 'package:Moody/models/api_response_model.dart';
 import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/services/auth_service.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-
 import '../constants.dart';
 
 enum HttpRequestMethod { GET, POST, DELETE, PUT }

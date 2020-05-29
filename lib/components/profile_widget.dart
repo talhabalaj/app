@@ -1,12 +1,9 @@
 import 'package:Moody/components/default_shimmer.dart';
-import 'package:Moody/components/primary_button.dart';
 import 'package:Moody/helpers/navigation.dart';
 import 'package:Moody/models/user_model.dart';
 import 'package:Moody/screens/people_list_screen.dart';
-import 'package:Moody/services/auth_service.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
 class ProfileWidget extends StatelessWidget {
   final UserModel user;

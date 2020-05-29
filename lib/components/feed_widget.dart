@@ -6,7 +6,6 @@ import 'package:Moody/helpers/dialogs.dart';
 import 'package:Moody/services/feed_service.dart';
 import 'package:flutter/material.dart';
 import 'package:Moody/models/error_response_model.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class FeedWidget extends StatefulWidget {
   final FeedService feedService;
