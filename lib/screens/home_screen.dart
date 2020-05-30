@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:Moody/helpers/dialogs.dart';
 import 'package:Moody/helpers/navigation.dart';
 import 'package:Moody/models/error_response_model.dart';
@@ -121,10 +123,11 @@ class _HomeScreenState extends State<HomeScreen> {
           resizeToAvoidBottomInset: false,
           floatingActionButton: FloatingActionButton(
             onPressed: () async {
-              final image =
-                  await ImagePicker.pickImage(source: ImageSource.gallery);
+              final pickedFile =
+                  await ImagePicker().getImage(source: ImageSource.gallery);
 
-              if (image != null) {
+              if (pickedFile != null) {
+                final image = File(pickedFile.path);
                 final imageEdited = await Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => EditImageScreen(image: image),
@@ -186,8 +189,6 @@ class _HomeScreenState extends State<HomeScreen> {
               this.setState(() {
                 index = i;
               });
-              if (index == 2)
-                notificationService.markNewUnreadNotificationRead();
             },
           ),
         ),

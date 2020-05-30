@@ -30,11 +30,10 @@ class PrimaryStyleTextField extends StatelessWidget {
       controller: controller,
       autofocus: autofocus,
       onTap: onTap,
-      style: TextStyle(fontFamily: 'joypixels'),
       onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hintText,
-        contentPadding: EdgeInsets.symmetric(vertical: 2, horizontal: 15),
+        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
           borderSide:

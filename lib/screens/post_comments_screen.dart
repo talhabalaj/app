@@ -284,6 +284,7 @@ class _PostFullCommentState extends State<PostFullComment> {
           IconSlideAction(
             icon: EvaIcons.trash2Outline,
             foregroundColor: Colors.red,
+            color: Colors.transparent,
             onTap: widget.onPostDeleteAction,
           )
       ],

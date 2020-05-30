@@ -86,6 +86,7 @@ class _SearchFieldState extends State<SearchField> {
     return PrimaryStyleTextField(
         controller: controller,
         hintText: 'Search',
+        maxLines: 1,
         prefixIcon: Icon(
           EvaIcons.search,
           color: Color(0xff878787),

@@ -397,6 +397,13 @@ class _PostCompactCommentsState extends State<PostCompactComments> {
       child: Text.rich(
         TextSpan(
           children: [
+            if (widget.post.comments.length > 3)
+              TextSpan(
+                text: 'View all comments\n',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                ),
+              ),
             for (int idx = 0; idx < lessComments.length; idx++)
               TextSpan(
                 children: [
@@ -404,13 +411,6 @@ class _PostCompactCommentsState extends State<PostCompactComments> {
                   if (idx != lessComments.length - 1) TextSpan(text: '\n')
                 ],
               ),
-            if (widget.post.comments.length > 3)
-              TextSpan(
-                text: '\nView all comments',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                ),
-              )
           ],
         ),
       ),

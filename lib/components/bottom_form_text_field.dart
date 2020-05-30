@@ -47,7 +47,7 @@ class _BottomSingleTextFieldFormState extends State<BottomSingleTextFieldForm> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Container(
-          height: 55,
+          constraints: BoxConstraints(minHeight: 55),
           decoration: containerDecoration,
           padding: EdgeInsets.all(8),
           child: Row(
@@ -66,17 +66,25 @@ class _BottomSingleTextFieldFormState extends State<BottomSingleTextFieldForm> {
                     }
                   },
                   onChanged: (value) {
-                    _message = value.trim();
+                    setState(() {
+                      _message = value.trim();
+                    });
                   },
                 ),
               ),
-              _buildSideButton(_onEmojiPickerToggle),
-              _buildSideButton(_onSendPressed)
+              _buildSideButton(
+                _onEmojiPickerToggle,
+                iconData:
+                    _isEmojiPickerOpen ? Icons.keyboard : Icons.insert_emoticon,
+              ),
+              _buildSideButton(
+                _message != '' ? _onSendPressed : null,
+                iconData: Icons.send,
+              ),
             ],
           ),
         ),
-        AnimatedContainer(
-          duration: Duration(milliseconds: 500),
+        Container(
           height: _isEmojiPickerOpen ? 250 : 0,
           child: EmojiKeyboard(
             emojiFont: 'joypixels',
@@ -88,18 +96,17 @@ class _BottomSingleTextFieldFormState extends State<BottomSingleTextFieldForm> {
   }
 
   void _onEmojiPickerToggle() {
-    if (!_isEmojiPickerOpen) {
-      SystemChannels.textInput.invokeMethod('TextInput.hide');
-    } else
-      SystemChannels.textInput.invokeMethod('TextInput.show');
     setState(() {
       _isEmojiPickerOpen = !_isEmojiPickerOpen;
+      if (_isEmojiPickerOpen) {
+        SystemChannels.textInput.invokeMethod('TextInput.hide');
+      } else
+        SystemChannels.textInput.invokeMethod('TextInput.show');
     });
   }
 
-  Expanded _buildSideButton(Function onPressed) {
+  Expanded _buildSideButton(Function onPressed, {IconData iconData}) {
     return Expanded(
-      flex: 1,
       child: RaisedButton(
         shape: CircleBorder(
           side: BorderSide(
@@ -107,11 +114,12 @@ class _BottomSingleTextFieldFormState extends State<BottomSingleTextFieldForm> {
             width: 1,
           ),
         ),
+        padding: EdgeInsets.all(0),
         disabledColor: Colors.grey[100],
-        textColor: Colors.white,
-        color: kPrimaryColor,
+        textColor: kPrimaryColor,
+        color: Colors.white,
         child: Icon(
-          Icons.send,
+          iconData,
           size: 15,
         ),
         onPressed: onPressed,
@@ -121,8 +129,8 @@ class _BottomSingleTextFieldFormState extends State<BottomSingleTextFieldForm> {
 
   void _onSendPressed() {
     widget.onSend(_message);
+    _controller.clear();
     setState(() {
-      _controller.clear();
       _message = '';
     });
   }
@@ -130,6 +138,15 @@ class _BottomSingleTextFieldFormState extends State<BottomSingleTextFieldForm> {
   _handleEmojiPressed(emoji) {
     final selection = _controller.value.selection;
     final oldText = _controller.value.text;
+
+    if (selection.extent.offset <= 0) {
+      // Invalid
+      _controller.selection = TextSelection.fromPosition(
+        TextPosition(
+          offset: 0,
+        ),
+      );
+    }
 
     final newText =
         '${oldText.substring(0, selection.extent.offset)}${emoji.emoji}${oldText.substring(selection.extent.offset)}';
