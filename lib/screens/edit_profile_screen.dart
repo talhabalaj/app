@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:Moody/components/loader.dart';
 import 'package:Moody/components/primary_button.dart';
 import 'package:Moody/constants.dart';
@@ -70,8 +72,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       style: TextStyle(color: kPrimaryColor),
                     ),
                     onTap: () async {
-                      final image = await ImagePicker.pickImage(
-                          source: ImageSource.gallery, imageQuality: 100);
+                      final image = File((await ImagePicker()
+                              .getImage(source: ImageSource.gallery))
+                          .path);
                       if (image != null) {
                         final imageEdited = await Navigator.of(context).push(
                           MaterialPageRoute(
