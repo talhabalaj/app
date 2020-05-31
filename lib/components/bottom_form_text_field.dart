@@ -17,7 +17,8 @@ class BottomSingleTextFieldForm extends StatefulWidget {
       _BottomSingleTextFieldFormState();
 }
 
-class _BottomSingleTextFieldFormState extends State<BottomSingleTextFieldForm> {
+class _BottomSingleTextFieldFormState extends State<BottomSingleTextFieldForm>
+    with TickerProviderStateMixin {
   TextEditingController _controller;
   bool _isEmojiPickerOpen;
   String _message;
@@ -84,13 +85,15 @@ class _BottomSingleTextFieldFormState extends State<BottomSingleTextFieldForm> {
             ],
           ),
         ),
-        Container(
-          height: _isEmojiPickerOpen ? 250 : 0,
+        AnimatedSize(
+          duration: Duration(milliseconds: 350),
+          vsync: this,
           child: EmojiKeyboard(
             emojiFont: 'joypixels',
+            height: _isEmojiPickerOpen ? 250 : 0,
             onEmojiPressed: _handleEmojiPressed,
           ),
-        )
+        ),
       ],
     );
   }
