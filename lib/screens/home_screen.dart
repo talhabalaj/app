@@ -12,7 +12,6 @@ import 'package:Moody/screens/notification_screen.dart';
 import 'package:Moody/screens/post_comments_screen.dart';
 import 'package:Moody/screens/profile_screen.dart';
 import 'package:Moody/screens/search_screen.dart';
-import 'package:Moody/screens/user_screen.dart';
 import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/feed_service.dart';
 import 'package:Moody/services/notification_service.dart';
@@ -55,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       SearchScreen(),
       NotificationScreen(),
-      UserScreen(),
+      ProfileScreen(),
     ];
   }
 

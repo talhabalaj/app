@@ -1,8 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:Moody/components/default_shimmer.dart';
-import 'package:Moody/components/gridview_loading.dart';
-import 'package:Moody/components/loader.dart';
 import 'package:Moody/components/user_list_item.dart';
 import 'package:Moody/helpers/dialogs.dart';
 import 'package:Moody/helpers/emoji_text.dart';
@@ -10,15 +8,12 @@ import 'package:Moody/helpers/navigation.dart';
 import 'package:Moody/models/comment_model.dart';
 import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/models/post_model.dart';
-import 'package:Moody/models/user_model.dart';
 import 'package:Moody/screens/people_list_screen.dart';
 import 'package:Moody/screens/post_comments_screen.dart';
-import 'package:Moody/screens/post_screen.dart';
 import 'package:Moody/screens/profile_screen.dart';
 import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/feed_service.dart';
 import 'package:Moody/services/post_service.dart';
-import 'package:Moody/services/user_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
@@ -442,118 +437,6 @@ class PostCaption extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class UserPosts extends StatefulWidget {
-  final UserModel user;
-
-  UserPosts({this.user});
-
-  @override
-  _UserPostsState createState() => _UserPostsState();
-}
-
-class _UserPostsState extends State<UserPosts> {
-  bool postsLoading = true;
-  UserService userService;
-  List<PostModel> userPosts;
-  int lastIndexFetched;
-
-  Future<List<PostModel>> getUserPosts({int offset = 0}) async {
-    if (widget.user == null)
-      return this.userService.getUserPosts(offset: offset);
-    else
-      return this.userService.getUserPosts(id: widget.user.sId, offset: offset);
-  }
-
-  @override
-  void didChangeDependencies() {
-    userService = Provider.of<UserService>(context, listen: false);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        List<PostModel> posts = await getUserPosts();
-        if (this.mounted)
-          this.setState(() {
-            userPosts = posts;
-            postsLoading = false;
-            lastIndexFetched = 0;
-          });
-      } catch (e) {
-        print(e);
-      }
-    });
-    super.didChangeDependencies();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return postsLoading
-        ? GridViewLoading()
-        : Container(
-            height: MediaQuery.of(context).size.height - 400,
-            color: Colors.grey[100],
-            child: userPosts.length > 0
-                ? CustomScrollView(
-                    physics: ScrollPhysics(),
-                    slivers: <Widget>[
-                      SliverGrid(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            if (index < userPosts.length) {
-                              return GestureDetector(
-                                onTap: () {
-                                  gotoPageWithAnimation(
-                                    context: context,
-                                    page: PostScreen(
-                                      post: userPosts[index],
-                                    ),
-                                  );
-                                },
-                                child: ExtendedImage.network(
-                                  userPosts[index].imageUrl,
-                                  cache: true,
-                                ),
-                              );
-                            } else {
-                              if (lastIndexFetched < index) {
-                                lastIndexFetched = index;
-
-                                getUserPosts(offset: userPosts.length)
-                                    .then((value) {
-                                  if (this.mounted)
-                                    this.setState(() {
-                                      userPosts.addAll(value);
-                                      postsLoading = false;
-                                    });
-                                });
-                              }
-                              return null;
-                            }
-                          },
-                          childCount: userPosts.length + 1,
-                        ),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          childAspectRatio: 1 / 1,
-                          mainAxisSpacing: 2,
-                          crossAxisSpacing: 2,
-                        ),
-                      ),
-                      if (postsLoading)
-                        SliverToBoxAdapter(
-                          child: Loader(),
-                        ),
-                    ],
-                  )
-                : Center(
-                    child: Text(
-                      "No posts to show.",
-                      style: TextStyle(fontSize: 20),
-                    ),
-                  ),
-          );
   }
 }
 

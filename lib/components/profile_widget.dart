@@ -1,4 +1,5 @@
 import 'package:Moody/components/default_shimmer.dart';
+import 'package:Moody/helpers/emoji_text.dart';
 import 'package:Moody/helpers/navigation.dart';
 import 'package:Moody/models/user_model.dart';
 import 'package:Moody/screens/people_list_screen.dart';
@@ -36,14 +37,16 @@ class ProfileWidget extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Text(
-            user.bio,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w100,
-              color: Colors.grey[600],
+          child: Text.rich(
+            buildTextSpansWithEmojiSupport(
+              user.bio,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w100,
+                color: Colors.grey[600],
+              ),
             ),
+            textAlign: TextAlign.center,
           ),
         ),
         Container(

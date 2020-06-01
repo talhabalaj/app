@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:Moody/components/primary_textfield.dart';
 import 'package:Moody/constants.dart';
 import 'package:emoji_keyboard/emoji_keyboard.dart';
@@ -22,6 +24,7 @@ class _BottomSingleTextFieldFormState extends State<BottomSingleTextFieldForm>
   TextEditingController _controller;
   bool _isEmojiPickerOpen;
   String _message;
+  FocusNode _focusNode;
 
   final containerDecoration = BoxDecoration(
     boxShadow: [BoxShadow(blurRadius: 2, color: Colors.black12)],
@@ -33,6 +36,7 @@ class _BottomSingleTextFieldFormState extends State<BottomSingleTextFieldForm>
     super.initState();
     _controller = TextEditingController();
     _isEmojiPickerOpen = false;
+    _focusNode = FocusNode();
     _message = '';
   }
 
@@ -55,22 +59,32 @@ class _BottomSingleTextFieldFormState extends State<BottomSingleTextFieldForm>
             children: <Widget>[
               Expanded(
                 flex: 5,
-                child: PrimaryStyleTextField(
-                  controller: _controller,
-                  hintText: 'Message',
-                  hasBorder: true,
-                  onTap: () {
-                    if (_isEmojiPickerOpen) {
-                      setState(() {
-                        _isEmojiPickerOpen = !_isEmojiPickerOpen;
+                child: FocusScope(
+                  onFocusChange: (hasFocus) {
+                    if (hasFocus && _isEmojiPickerOpen) {
+                      Timer(Duration(milliseconds: 1), () {
+                        SystemChannels.textInput.invokeMethod('TextInput.hide');
                       });
                     }
                   },
-                  onChanged: (value) {
-                    setState(() {
-                      _message = value.trim();
-                    });
-                  },
+                  child: PrimaryStyleTextField(
+                    controller: _controller,
+                    hintText: 'Message',
+                    hasBorder: true,
+                    focusNode: _focusNode,
+                    onTap: () {
+                      if (_isEmojiPickerOpen) {
+                        setState(() {
+                          _isEmojiPickerOpen = !_isEmojiPickerOpen;
+                        });
+                      }
+                    },
+                    onChanged: (value) {
+                      setState(() {
+                        _message = value.trim();
+                      });
+                    },
+                  ),
                 ),
               ),
               _buildSideButton(
@@ -86,7 +100,8 @@ class _BottomSingleTextFieldFormState extends State<BottomSingleTextFieldForm>
           ),
         ),
         AnimatedSize(
-          duration: Duration(milliseconds: 350),
+          duration: Duration(milliseconds: 100),
+          reverseDuration: Duration(milliseconds: 1),
           vsync: this,
           child: EmojiKeyboard(
             emojiFont: 'joypixels',
@@ -102,6 +117,7 @@ class _BottomSingleTextFieldFormState extends State<BottomSingleTextFieldForm>
     setState(() {
       _isEmojiPickerOpen = !_isEmojiPickerOpen;
       if (_isEmojiPickerOpen) {
+        if (!_focusNode.hasFocus) _focusNode.requestFocus();
         SystemChannels.textInput.invokeMethod('TextInput.hide');
       } else
         SystemChannels.textInput.invokeMethod('TextInput.show');
@@ -139,25 +155,12 @@ class _BottomSingleTextFieldFormState extends State<BottomSingleTextFieldForm>
   }
 
   _handleEmojiPressed(emoji) {
-    final selection = _controller.value.selection;
-    final oldText = _controller.value.text;
-
-    if (selection.extent.offset <= 0) {
-      // Invalid
-      _controller.selection = TextSelection.fromPosition(
-        TextPosition(
-          offset: 0,
-        ),
-      );
-    }
-
-    final newText =
-        '${oldText.substring(0, selection.extent.offset)}${emoji.emoji}${oldText.substring(selection.extent.offset)}';
+    final newText = _controller.text + emoji.emoji;
     _controller.value = _controller.value.copyWith(
       text: newText,
       selection: TextSelection.fromPosition(
         TextPosition(
-          offset: selection.extent.offset + emoji.emoji.length,
+          offset: newText.length,
         ),
       ),
     );

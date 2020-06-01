@@ -8,6 +8,7 @@ class PrimaryStyleTextField extends StatelessWidget {
       this.suffixIcon,
       this.autofocus = false,
       this.prefixIcon,
+      this.focusNode,
       this.hasBorder = false,
       this.onTap,
       this.maxLines,
@@ -23,6 +24,7 @@ class PrimaryStyleTextField extends StatelessWidget {
   final Function onTap;
   final Widget prefixIcon;
   final int maxLines;
+  final FocusNode focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +32,7 @@ class PrimaryStyleTextField extends StatelessWidget {
       controller: controller,
       autofocus: autofocus,
       onTap: onTap,
+      focusNode: focusNode,
       onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hintText,
