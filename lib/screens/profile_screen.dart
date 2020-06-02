@@ -129,7 +129,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SliverToBoxAdapter(
               child: SizedBox(height: 30),
             ),
-            _postsLoading
+            _postsLoading && _userPosts == null
                 ? SliverGrid(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3,
@@ -156,13 +156,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           crossAxisSpacing: 2,
                         ),
                       )
-                    : Center(
-                        child: Text(
-                          "No posts to show.",
-                          style: TextStyle(fontSize: 20),
+                    : SliverToBoxAdapter(
+                        child: Center(
+                          child: Text(
+                            "No posts to show.",
+                            style: TextStyle(fontSize: 20),
+                          ),
                         ),
                       ),
-            if (_postsLoading)
+            if (_postsLoading && _userPosts != null && _userPosts.length > 0)
               SliverToBoxAdapter(
                 child: Loader(),
               ),

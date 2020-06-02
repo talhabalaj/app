@@ -11,8 +11,10 @@ import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/message_service.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_socket_io/socket_io_manager.dart';
 import 'package:provider/provider.dart';
-import 'package:socket_io_client/socket_io_client.dart';
+import 'package:flutter_socket_io/flutter_socket_io.dart';
+import 'package:toast/toast.dart';
 
 class ConversationScreen extends StatefulWidget {
   const ConversationScreen(
@@ -30,30 +32,106 @@ class ConversationScreen extends StatefulWidget {
   _ConversationScreenState createState() => _ConversationScreenState();
 }
 
-class _ConversationScreenState extends State<ConversationScreen> {
+class _ConversationScreenState extends State<ConversationScreen>
+    with WidgetsBindingObserver {
   int lastIndexRequested = -1;
   bool handlerSet = false;
-  Socket socket;
+  bool shouldMarkSeen = true;
+  SocketIO socket;
   List<MessageModel> messages = List<MessageModel>();
   MessageService messageService;
   GlobalKey messageViewBuilderKey = GlobalKey();
+  List<String> messageIdsPendingSeen = List<String>();
 
   @override
   void initState() {
     super.initState();
-    socket = io(kApiUrl, <String, dynamic>{
-      'transports': ['websocket'],
-      'query': {
-        'conversation': widget.conversation.sId,
-        'token': widget.authService.auth.token,
-      }
-    });
+    socket = SocketIOManager().createSocketIO(
+      kApiUrl,
+      '/',
+      query:
+          'conversation=${widget.conversation.sId}&token=${widget.authService.auth.token}',
+    );
+
+    socket.init();
+    socket.connect();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  Future<void> markSeen() async {
+    if (shouldMarkSeen) {
+      final copy = [...messageIdsPendingSeen];
+      socket.sendMessage('message_seen', jsonEncode({'messageIds': copy}));
+      messageIdsPendingSeen
+          .removeWhere((element) => copy.indexOf(element) != -1);
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    shouldMarkSeen = state == AppLifecycleState.resumed;
+    if (shouldMarkSeen) markSeen();
+    super.didChangeAppLifecycleState(state);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    SocketIOManager().destroySocket(socket);
+    super.dispose();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     messageService = Provider.of<MessageService>(context, listen: false);
+
+    if (!handlerSet) {
+      socket.subscribe('message_seen', (data) {
+        final parsedData = jsonDecode(data);
+        if (this.mounted)
+          setState(() {
+            for (String mesesageId in parsedData['messageIds']) {
+              int index =
+                  messages.indexWhere((element) => element.sId == mesesageId);
+              messages[index].seen = true;
+            }
+          });
+      });
+
+      socket.subscribe('message', (data) {
+        final parsedData = jsonDecode(data);
+        final String id = parsedData['uniqueId'];
+        final message = MessageModel.fromJson(parsedData['message']);
+        int index = messages.indexWhere((element) => element.sId == id);
+
+        if (!message.seen &&
+            message.from.sId != messageService.authService.user.sId) {
+          messageIdsPendingSeen.add(message.sId);
+          markSeen();
+        }
+
+        Function addMessage = () {
+          if (index != -1) {
+            messages[index] = message;
+          } else {
+            messages.insert(0, message);
+          }
+          if (messages.length > 0) {
+            final messageService =
+                Provider.of<MessageService>(context, listen: false);
+            messageService.updateConversation(
+                widget.conversation.sId, messages);
+          }
+        };
+
+        if (mounted)
+          setState(() {
+            addMessage();
+          });
+      });
+      handlerSet = true;
+    }
   }
 
   @override
@@ -77,106 +155,92 @@ class _ConversationScreenState extends State<ConversationScreen> {
         body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            StatefulBuilder(
-              key: messageViewBuilderKey,
-              builder: (context, setMessagesState) {
-                if (!handlerSet) {
-                  socket.on('message', (data) {
-                    final parsedData = jsonDecode(data);
-                    final String id = parsedData['uniqueId'];
-                    final message =
-                        MessageModel.fromJson(parsedData['message']);
-                    int index =
-                        messages.indexWhere((element) => element.sId == id);
-
-                    Function addMessage = () {
-                      if (index != -1) {
-                        messages[index] = message;
-                      } else {
-                        messages.insert(0, message);
-                      }
-                      final messageService =
-                          Provider.of<MessageService>(context, listen: false);
-                      messageService.updateConversation(
-                          widget.conversation.sId, messages);
-                    };
-
-                    if (mounted)
-                      setMessagesState(() {
-                        addMessage();
-                      });
-                  });
-                  handlerSet = true;
-                }
-                return Expanded(
-                  child: CustomScrollView(
-                    reverse: true,
-                    slivers: [
-                      SliverPadding(
-                        padding: EdgeInsets.only(
-                          top: 10,
-                          bottom: 10,
-                        ),
-                        sliver: SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              if (index < messages.length) {
-                                final message = messages.elementAt(index);
-                                return Message(
-                                  message: message,
-                                  right: message.from.sId ==
-                                      messageService.authService.user.sId,
-                                  hasDetails: index == 0,
-                                );
-                              } else {
-                                if (lastIndexRequested < index) {
-                                  lastIndexRequested = index + 1;
-                                  messageService
-                                      .getMessages(widget.conversation.sId,
-                                          offset: messages.length)
-                                      .then((value) {
-                                    if (this.mounted)
-                                      setMessagesState(() {
-                                        messages.addAll(value);
-                                      });
+            Expanded(
+              child: CustomScrollView(
+                reverse: true,
+                slivers: [
+                  SliverPadding(
+                    padding: EdgeInsets.only(
+                      top: 10,
+                      bottom: 10,
+                    ),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          if (index < messages.length) {
+                            final message = messages.elementAt(index);
+                            return Message(
+                              message: message,
+                              right: message.from.sId ==
+                                  messageService.authService.user.sId,
+                              hasDetails: index == 0,
+                            );
+                          } else {
+                            if (lastIndexRequested < index) {
+                              lastIndexRequested = index + 1;
+                              messageService
+                                  .getMessages(
+                                widget.conversation.sId,
+                                offset: messages.length,
+                              )
+                                  .then((value) {
+                                messageIdsPendingSeen.addAll(value
+                                    .where((e) =>
+                                        !e.seen &&
+                                        e.from.sId !=
+                                            messageService.authService.user.sId)
+                                    .map((e) => e.sId));
+                                markSeen();
+                                if (this.mounted)
+                                  setState(() {
+                                    messages.addAll(value);
                                   });
+                              });
 
-                                  return Padding(
-                                    padding: EdgeInsets.all(25),
-                                    child: Loader(),
-                                  );
-                                }
-
-                                return null;
-                              }
-                            },
-                          ),
-                        ),
+                              return Padding(
+                                padding: EdgeInsets.all(25),
+                                child: Loader(),
+                              );
+                            }
+                            return null;
+                          }
+                        },
+                        childCount: messages.length + 1,
                       ),
-                    ],
+                    ),
                   ),
-                );
-              },
+                ],
+              ),
             ),
             BottomSingleTextFieldForm(
               onSend: (text) {
+                if (text == '') {
+                  Toast.show('Empty message is not allowed!', context);
+                  return;
+                }
+
                 final newMessage = MessageModel(
                   content: text,
                   conversation: widget.conversation.sId,
                   from: widget.authService.user,
                 );
 
-                messageViewBuilderKey.currentState.setState(() {
+                setState(() {
                   messages.insert(
                     0,
                     newMessage,
                   );
                 });
 
-                socket.emit('message', {
-                  'message': text,
-                  'uniqueId': newMessage.sId,
-                });
+                socket.sendMessage(
+                  'message',
+                  jsonEncode(
+                    {
+                      'message': text,
+                      'uniqueId': newMessage.sId,
+                    },
+                  ),
+                );
               },
             ),
           ],
@@ -214,7 +278,9 @@ class Message extends StatelessWidget {
               children: <Widget>[
                 Container(
                   padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                  constraints: BoxConstraints.loose(Size.fromWidth(250)),
+                  constraints: BoxConstraints.loose(
+                    Size.fromWidth(250),
+                  ),
                   decoration: shouldBeBig
                       ? null
                       : BoxDecoration(
@@ -261,11 +327,11 @@ class Message extends StatelessWidget {
       details = 'Sent';
       if (message.delivered) {
         details = 'Delivered';
-        if (message.seen) {
-          details = 'Seen';
-        }
       }
-      final sentTime = DateTime.parse(message.createdAt);
+      if (message.seen) {
+        details = 'Seen';
+      }
+      final sentTime = DateTime.parse(message.updatedAt);
       final hour =
           sentTime.hour > 9 ? sentTime.hour.toString() : '0${sentTime.hour}';
       final min = sentTime.minute > 9

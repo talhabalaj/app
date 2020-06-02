@@ -51,6 +51,8 @@ class MessageService extends ChangeNotifier {
     conversations
         .firstWhere((element) => element.sId == conversationId)
         .messages = messages;
+    conversations.sort((a, b) =>
+        b.messages.first.createdAt.compareTo(a.messages.first.createdAt));
     notifyListeners();
   }
 }

@@ -161,7 +161,14 @@ class UserConversation extends StatelessWidget {
                         Text.rich(
                           buildTextSpansWithEmojiSupport(
                             conversation.messages[0].content,
-                            style: TextStyle(fontSize: 14),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: !conversation.messages[0].seen &&
+                                      conversation.messages[0].from.userName !=
+                                          user.userName
+                                  ? null
+                                  : FontWeight.bold,
+                            ),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
