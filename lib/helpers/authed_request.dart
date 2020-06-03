@@ -2,9 +2,11 @@ import 'package:Moody/models/api_response_model.dart';
 import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/services/auth_service.dart';
 import 'package:dio/dio.dart';
-import '../constants.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 enum HttpRequestMethod { GET, POST, DELETE, PUT }
+
+final String apiUrl = DotEnv().env['API_URL'];
 
 class ApiRequest {
   AuthService authService;
@@ -18,7 +20,7 @@ class ApiRequest {
       _headers = Map<String, String>();
     }
 
-    bool isSecure = kApiUrl.split("://")[0] == 'https';
+    bool isSecure = apiUrl.split("://")[0] == 'https';
 
     if (this.authService != null)
       _headers['Cookie'] =
@@ -26,7 +28,7 @@ class ApiRequest {
 
     _request = Dio(
       BaseOptions(
-        baseUrl: kApiUrl,
+        baseUrl: apiUrl,
         headers: _headers,
         responseType: ResponseType.json,
       ),

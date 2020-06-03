@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-import 'package:Moody/constants.dart';
 import 'package:Moody/helpers/authed_request.dart';
 import 'package:Moody/models/api_response_model.dart';
 import 'package:Moody/models/authtoken_model.dart';
@@ -45,7 +44,7 @@ class AuthService extends ChangeNotifier {
     http.Response res;
 
     res = await http.post(
-      '$kApiUrl/user/login',
+      '$apiUrl/user/login',
       headers: {
         "Content-Type": "application/json",
       },
@@ -89,7 +88,7 @@ class AuthService extends ChangeNotifier {
       String lastName,
       String email}) async {
     await http.post(
-      '$kApiUrl/user/register',
+      '$apiUrl/user/register',
       headers: {
         "Content-Type": "application/json",
       },

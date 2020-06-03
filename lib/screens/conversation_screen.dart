@@ -11,6 +11,7 @@ import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/message_service.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_socket_io/socket_io_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_socket_io/flutter_socket_io.dart';
@@ -47,7 +48,7 @@ class _ConversationScreenState extends State<ConversationScreen>
   void initState() {
     super.initState();
     socket = SocketIOManager().createSocketIO(
-      kApiUrl,
+      DotEnv().env['API_URL'],
       '/',
       query:
           'conversation=${widget.conversation.sId}&token=${widget.authService.auth.token}',
@@ -111,24 +112,19 @@ class _ConversationScreenState extends State<ConversationScreen>
           markSeen();
         }
 
-        Function addMessage = () {
-          if (index != -1) {
-            messages[index] = message;
-          } else {
-            messages.insert(0, message);
-          }
-          if (messages.length > 0) {
-            final messageService =
-                Provider.of<MessageService>(context, listen: false);
-            messageService.updateConversation(
-                widget.conversation.sId, messages);
-          }
-        };
-
         if (mounted)
           setState(() {
-            addMessage();
+            if (index != -1) {
+              messages[index] = message;
+            } else {
+              messages.insert(0, message);
+            }
           });
+        if (messages.length > 0) {
+          final messageService =
+              Provider.of<MessageService>(context, listen: false);
+          messageService.updateConversation(widget.conversation.sId, messages);
+        }
       });
       handlerSet = true;
     }
@@ -158,6 +154,7 @@ class _ConversationScreenState extends State<ConversationScreen>
             Expanded(
               child: CustomScrollView(
                 reverse: true,
+                physics: BouncingScrollPhysics(),
                 slivers: [
                   SliverPadding(
                     padding: EdgeInsets.only(
@@ -170,6 +167,7 @@ class _ConversationScreenState extends State<ConversationScreen>
                           if (index < messages.length) {
                             final message = messages.elementAt(index);
                             return Message(
+                              key: ValueKey(message.sId),
                               message: message,
                               right: message.from.sId ==
                                   messageService.authService.user.sId,
@@ -196,7 +194,7 @@ class _ConversationScreenState extends State<ConversationScreen>
                                     messages.addAll(value);
                                   });
                               });
-
+                              print('Returned Loader');
                               return Padding(
                                 padding: EdgeInsets.all(25),
                                 child: Loader(),
