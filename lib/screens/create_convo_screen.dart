@@ -1,6 +1,6 @@
 import 'package:Moody/components/loader.dart';
 import 'package:Moody/components/user_list_item.dart';
-import 'package:Moody/models/user_model.dart';
+import 'package:Moody/helpers/navigation.dart';
 import 'package:Moody/screens/conversation_screen.dart';
 import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/message_service.dart';
@@ -22,7 +22,6 @@ class _CreateConversationScreenState extends State<CreateConversationScreen> {
   Widget build(BuildContext context) {
     final AuthService authService =
         Provider.of<AuthService>(context, listen: false);
-
     final messageService = Provider.of<MessageService>(context, listen: false);
 
     return Scaffold(
@@ -33,34 +32,32 @@ class _CreateConversationScreenState extends State<CreateConversationScreen> {
       body: Stack(
         children: <Widget>[
           if (loading) Center(child: Loader()),
-          ListView(
-            children: <Widget>[
-              for (UserModel follower in authService.user.followers)
-                UserListItem(
-                  user: follower,
-                  onTap: () async {
-                    if (!loading) {
-                      setState(() {
-                        this.loading = true;
-                      });
-                      final conversation =
-                          await messageService.createConversation(follower.sId);
-                      this.loading = false;
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ConversationScreen(
-                            conversation: conversation,
-                            toUser: follower,
-                            authService: Provider.of<AuthService>(context,
-                                listen: false),
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                ),
-            ],
+          if (authService.user.followers.length == 0)
+            Center(child: Text('No followers to create conversation with.')),
+          ListView.builder(
+            itemCount: authService.user.followers.length,
+            itemBuilder: (context, index) => UserListItem(
+              user: authService.user.followers[index],
+              onTap: () async {
+                if (!loading) {
+                  setState(() {
+                    this.loading = true;
+                  });
+                  final conversation = await messageService.createConversation(
+                      authService.user.followers[index].sId);
+                  this.loading = false;
+                  gotoPageWithAnimation(
+                    context: context,
+                    page: ConversationScreen(
+                      conversation: conversation,
+                      toUser: authService.user.followers[index],
+                      authService: authService,
+                    ),
+                    name: '/messages/${conversation.sId}',
+                  );
+                }
+              },
+            ),
           ),
         ],
       ),

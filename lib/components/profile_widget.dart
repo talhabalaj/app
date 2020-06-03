@@ -62,6 +62,7 @@ class ProfileWidget extends StatelessWidget {
                       listTitle: 'Following',
                       list: user.following.map((e) => e.sId).toList(),
                     ),
+                    name: '/user/${user.sId}/following',
                   );
                 },
                 disabledTextColor: Colors.grey[600],
@@ -87,6 +88,7 @@ class ProfileWidget extends StatelessWidget {
                       listTitle: 'Followers',
                       list: user.followers.map((e) => e.sId).toList(),
                     ),
+                    name: '/user/${user.sId}/followers',
                   );
                 },
                 disabledTextColor: Colors.grey[600],

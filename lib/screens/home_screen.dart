@@ -73,6 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
           postId: postId,
           hasPost: true,
         ),
+        name: '/posts/$postId/comments/$commentId',
       );
     } else if (msg['data']['post_id'] != null) {
       final String postId = msg['data']['post_id'];
@@ -82,6 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
           postId: postId,
           hasPost: true,
         ),
+        name: '/post/$postId/comments?withPost=true',
       );
     } else if (msg['data']['user_id'] != null) {
       final String userId = msg['data']['user_id'];
@@ -92,6 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
             sId: userId,
           ),
         ),
+        name: '/user/$userId',
       );
     }
   }

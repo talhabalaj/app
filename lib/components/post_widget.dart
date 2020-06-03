@@ -60,11 +60,11 @@ class _PostWidgetState extends State<PostWidget> {
     final Function comment = isNetworkPost
         ? () {
             gotoPageWithAnimation(
-              context: context,
-              page: PostCommentsScreen(
-                postId: widget.post.sId,
-              ),
-            );
+                context: context,
+                page: PostCommentsScreen(
+                  postId: widget.post.sId,
+                ),
+                name: '/post/${widget.post.sId}/comments');
           }
         : null;
 
@@ -185,6 +185,7 @@ class PostTopBar extends StatelessWidget {
                 page: ProfileScreen(
                   user: post.user,
                 ),
+                name: '/user/${post.user}',
               );
             },
             child: Row(
@@ -295,12 +296,12 @@ class _PostBottomDetailsState extends State<PostBottomDetails> {
     return GestureDetector(
       onTap: () {
         gotoPageWithAnimation(
-          context: context,
-          page: PeopleListScreen(
-            list: widget.post.likes,
-            listTitle: "Likers",
-          ),
-        );
+            context: context,
+            page: PeopleListScreen(
+              list: widget.post.likes,
+              listTitle: "Likers",
+            ),
+            name: '/post/${widget.post.sId}/likes');
       },
       child: Padding(
         padding: const EdgeInsets.only(bottom: 4),
@@ -385,9 +386,9 @@ class _PostCompactCommentsState extends State<PostCompactComments> {
     return GestureDetector(
       onTap: () {
         gotoPageWithAnimation(
-          context: context,
-          page: PostCommentsScreen(postId: widget.post.sId),
-        );
+            context: context,
+            page: PostCommentsScreen(postId: widget.post.sId),
+            name: '/post/${widget.post.sId}/comments');
       },
       child: Text.rich(
         TextSpan(

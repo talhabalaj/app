@@ -187,6 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           gotoPageWithAnimation(
                             context: context,
                             page: EditProfileScreen(),
+                            name: '/user/edit',
                           );
                         },
                         child: Text('Edit Profile'),
@@ -209,6 +210,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             page: PostScreen(
               post: _userPosts[index],
             ),
+            name: '/post/${_userPosts[index].sId}',
           );
         },
         child: ExtendedImage.network(

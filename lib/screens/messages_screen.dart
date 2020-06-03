@@ -53,6 +53,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   gotoPageWithAnimation(
                     context: context,
                     page: CreateConversationScreen(),
+                    name: '/messages/create',
                   );
                 })
           ],
@@ -87,7 +88,11 @@ class _MessagesScreenState extends State<MessagesScreen> {
                       ],
                     );
                   } else if (messageService.conversations.length == 0) {
-                    return Text('No conversions are here.');
+                    return Center(
+                        child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Text('No conversions are here.'),
+                    ));
                   } else {
                     final memberExceptUser = messageService
                         .conversations[index].members
@@ -184,12 +189,14 @@ class UserConversation extends StatelessWidget {
       ),
       onPressed: () {
         gotoPageWithAnimation(
-            context: context,
-            page: ConversationScreen(
-              conversation: conversation,
-              toUser: user,
-              authService: Provider.of<AuthService>(context, listen: false),
-            ));
+          context: context,
+          page: ConversationScreen(
+            conversation: conversation,
+            toUser: user,
+            authService: Provider.of<AuthService>(context, listen: false),
+          ),
+          name: '/messages/${conversation.sId}',
+        );
       },
     );
   }

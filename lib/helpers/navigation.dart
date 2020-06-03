@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 
-Future<void> gotoPageWithAnimation(
-    {Widget page, @required BuildContext context}) async {
-  return Navigator.push(
+Future<T> gotoPageWithAnimation<T>({
+  @required Widget page,
+  @required BuildContext context,
+  @required String name,
+}) async {
+  return Navigator.push<T>(
     context,
-    MaterialPageRoute(builder: (context) => page),
+    MaterialPageRoute(
+      builder: (context) => page,
+      settings: RouteSettings(name: name),
+    ),
   );
 }

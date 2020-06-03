@@ -25,9 +25,9 @@ class UserListItem extends StatelessWidget {
               if (onTap == null) {
                 FocusScope.of(context).unfocus();
                 gotoPageWithAnimation(
-                  context: context,
-                  page: ProfileScreen(user: user),
-                );
+                    context: context,
+                    page: ProfileScreen(user: user),
+                    name: '/user/${user.sId}');
               } else {
                 onTap();
               }

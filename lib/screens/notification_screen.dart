@@ -27,11 +27,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
         richText = likeNotificationText(mNotification);
         browseNotification = () {
           gotoPageWithAnimation(
-              context: context,
-              page: PostCommentsScreen(
-                postId: mNotification.post.sId,
-                hasPost: true,
-              ));
+            context: context,
+            page: PostCommentsScreen(
+              postId: mNotification.post.sId,
+              hasPost: true,
+            ),
+            name: '/posts/${mNotification.post.sId}/comments?withPost=true',
+          );
         };
         break;
       case UserNotificationType.POST_COMMENTED:
@@ -44,6 +46,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
               hasPost: true,
               focusedCommentId: mNotification.comment.sId,
             ),
+            name: '/posts/${mNotification.post.sId}/comments?withPost=true',
           );
         };
         break;
@@ -55,6 +58,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             page: ProfileScreen(
               user: mNotification.from,
             ),
+            name: '/user/${mNotification.from}',
           );
         };
         break;
@@ -143,16 +147,21 @@ class _NotificationScreenState extends State<NotificationScreen> {
             },
             child: ListView.separated(
               itemBuilder: (context, index) =>
-                  notificationService.notifications.length == 0 &&
-                          notificationService.loading
-                      ? MNotificationLoading()
+                  notificationService.notifications.length == 0
+                      ? notificationService.loading
+                          ? MNotificationLoading()
+                          : Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Text('No notifications to show.'),
+                              ),
+                            )
                       : buildNotification(
                           notificationService.notifications[index],
                         ),
               physics: AlwaysScrollableScrollPhysics(),
-              itemCount: notificationService.notifications.length == 0 &&
-                      notificationService.loading
-                  ? 9
+              itemCount: notificationService.notifications.length == 0
+                  ? notificationService.loading ? 9 : 1
                   : notificationService.notifications.length,
               separatorBuilder: (context, index) => Divider(
                 height: 1,
