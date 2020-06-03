@@ -16,6 +16,7 @@ import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/feed_service.dart';
 import 'package:Moody/services/notification_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
