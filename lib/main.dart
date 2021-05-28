@@ -11,22 +11,19 @@ import 'package:Moody/services/post_service.dart';
 import 'package:Moody/services/search_service.dart';
 import 'package:Moody/services/user_service.dart';
 import 'package:animations/animations.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_analytics/observer.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-void main() async {
-  Crashlytics.instance.enableInDevMode = false;
 
-  await DotEnv().load('assets/.env');
+void main() async {
+  //await Firebase.initializeApp();
+  //FirebaseMessaging.onBackgroundMessage(onBackgroundMessageHandler);
+
 
   // Pass all uncaught errors from the framework to Crashlytics.
-  FlutterError.onError = Crashlytics.instance.recordFlutterError;
   runApp(
     MultiProvider(
       providers: [
@@ -77,7 +74,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    FirebaseAnalytics analytics = FirebaseAnalytics();
     IconThemeData iconThemeData = IconThemeData(color: kPrimaryColor);
     TextTheme textThemeData = GoogleFonts.interTextTheme();
 
@@ -113,7 +109,7 @@ class _MyAppState extends State<MyApp> {
         textTheme: textThemeData,
       ),
       navigatorObservers: [
-        FirebaseAnalyticsObserver(analytics: analytics),
+        // FirebaseAnalyticsObserver(analytics: analytics),
       ],
       routes: {
         SplashScreen.id: (context) => SplashScreen(),

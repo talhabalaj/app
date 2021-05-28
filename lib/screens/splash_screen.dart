@@ -29,6 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
       await auth.load();
       Navigator.popAndPushNamed(context, HomeScreen.id);
     } catch (e) {
+      print(e);
       Navigator.popAndPushNamed(context, LoginScreen.id);
     }
     super.didChangeDependencies();

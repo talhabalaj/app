@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:Moody/components/bottom_form_text_field.dart';
 import 'package:Moody/components/loader.dart';
 import 'package:Moody/constants.dart';
+import 'package:Moody/helpers/authed_request.dart';
 import 'package:Moody/helpers/emoji_text.dart';
 import 'package:Moody/models/conversation_model.dart';
 import 'package:Moody/models/message_model.dart';
@@ -11,11 +12,10 @@ import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/message_service.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_socket_io/socket_io_manager.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_socket_io/flutter_socket_io.dart';
+import 'package:socket_io_client/socket_io_client.dart';
 import 'package:toast/toast.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ConversationScreen extends StatefulWidget {
   const ConversationScreen(
@@ -38,7 +38,7 @@ class _ConversationScreenState extends State<ConversationScreen>
   int lastIndexRequested = -1;
   bool handlerSet = false;
   bool shouldMarkSeen = true;
-  SocketIO socket;
+  IO.Socket socket;
   List<MessageModel> messages = List<MessageModel>();
   MessageService messageService;
   GlobalKey messageViewBuilderKey = GlobalKey();
@@ -47,14 +47,13 @@ class _ConversationScreenState extends State<ConversationScreen>
   @override
   void initState() {
     super.initState();
-    socket = SocketIOManager().createSocketIO(
-      DotEnv().env['API_URL'],
-      '/',
-      query:
-          'conversation=${widget.conversation.sId}&token=${widget.authService.auth.token}',
-    );
-
-    socket.init();
+    socket = IO.io(
+        '$baseUrl/?conversation=${widget.conversation.sId}' +
+            (widget.authService.auth != null
+                ? '&token=${widget.authService.auth.token}'
+                : ''),
+        OptionBuilder().setTransports(['websocket']) // for Flutter or Dart VM
+            .build());
     socket.connect();
     WidgetsBinding.instance.addObserver(this);
   }
@@ -62,7 +61,7 @@ class _ConversationScreenState extends State<ConversationScreen>
   Future<void> markSeen() async {
     if (shouldMarkSeen) {
       final copy = [...messageIdsPendingSeen];
-      socket.sendMessage('message_seen', jsonEncode({'messageIds': copy}));
+      socket.emit('message_seen', jsonEncode({'messageIds': copy}));
       messageIdsPendingSeen
           .removeWhere((element) => copy.indexOf(element) != -1);
     }
@@ -78,7 +77,7 @@ class _ConversationScreenState extends State<ConversationScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    SocketIOManager().destroySocket(socket);
+    socket.disconnect();
     super.dispose();
   }
 
@@ -88,7 +87,7 @@ class _ConversationScreenState extends State<ConversationScreen>
     messageService = Provider.of<MessageService>(context, listen: false);
 
     if (!handlerSet) {
-      socket.subscribe('message_seen', (data) {
+      socket.on('message_seen', (data) {
         final parsedData = jsonDecode(data);
         if (this.mounted)
           setState(() {
@@ -100,7 +99,7 @@ class _ConversationScreenState extends State<ConversationScreen>
           });
       });
 
-      socket.subscribe('message', (data) {
+      socket.on('message', (data) {
         final parsedData = jsonDecode(data);
         final String id = parsedData['uniqueId'];
         final message = MessageModel.fromJson(parsedData['message']);
@@ -230,7 +229,7 @@ class _ConversationScreenState extends State<ConversationScreen>
                   );
                 });
 
-                socket.sendMessage(
+                socket.emit(
                   'message',
                   jsonEncode(
                     {
@@ -294,7 +293,9 @@ class Message extends StatelessWidget {
                       ),
                     ),
                     textAlign: shouldBeBig
-                        ? this.right ? TextAlign.right : TextAlign.left
+                        ? this.right
+                            ? TextAlign.right
+                            : TextAlign.left
                         : null,
                   ),
                 )

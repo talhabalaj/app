@@ -16,8 +16,6 @@ import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/feed_service.dart';
 import 'package:Moody/services/notification_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -32,7 +30,6 @@ class _HomeScreenState extends State<HomeScreen> {
   int index = 0;
   PageController pageController;
   List<Widget> tabs;
-  FirebaseMessaging fcm;
   bool isFCMConfigured = false;
 
   void gotoMessageScreen() {
@@ -101,22 +98,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    fcm = Provider.of<AuthService>(context, listen: false).fcm.fcm;
-    if (!isFCMConfigured) {
-      fcm.configure(
-        onMessage: (message) async {
-          // forground!
-        },
-        onLaunch: notificationHandler,
-        onResume: notificationHandler,
-      );
-      isFCMConfigured = true;
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     final notificationService = Provider.of<NotificationService>(context);
 
@@ -130,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   await ImagePicker().getImage(source: ImageSource.gallery);
 
               if (pickedFile != null) {
-                final image = File(pickedFile.path);
+                final image = await pickedFile.readAsBytes();
                 final imageEdited = await Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => EditImageScreen(image: image),
@@ -151,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         TextField(
                           controller: controller,
                         ),
-                        FlatButton(
+                        TextButton(
                           child: Text("Done"),
                           onPressed: () {
                             Navigator.of(context).pop();

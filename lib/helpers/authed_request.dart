@@ -2,18 +2,30 @@ import 'package:Moody/models/api_response_model.dart';
 import 'package:Moody/models/error_response_model.dart';
 import 'package:Moody/services/auth_service.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/foundation.dart';
 
 enum HttpRequestMethod { GET, POST, DELETE, PUT }
 
-final String apiUrl = DotEnv().env['API_URL'];
+final String baseUrl = kDebugMode
+    ? (kIsWeb ? "http://localhost:5000" : "http://10.0.2.2:5000")
+    : "https://moody-backend.talhabalaj.com";
+final String apiUrl = "$baseUrl/app/api/v1";
 
 class ApiRequest {
   AuthService authService;
   Map<String, String> _headers;
   Dio _request;
+  static ApiRequest instance;
 
-  ApiRequest({this.authService, Map<String, String> headers}) {
+  factory ApiRequest({AuthService authService, Map<String, String> headers}) {
+    if (instance == null) {
+      return ApiRequest.create(authService: authService, headers: headers);
+    } else {
+      return instance;
+    }
+  }
+
+  ApiRequest.create({this.authService, Map<String, String> headers}) {
     if (headers != null) {
       _headers = headers;
     } else {
@@ -22,7 +34,7 @@ class ApiRequest {
 
     bool isSecure = apiUrl.split("://")[0] == 'https';
 
-    if (this.authService != null)
+    if (this.authService != null && !kIsWeb)
       _headers['Cookie'] =
           'access_token=${authService.auth.token}; HttpOnly; ${isSecure ? 'Secure' : ''}';
 
@@ -62,21 +74,23 @@ class ApiRequest {
         path,
         options: Options(
           method: methodString,
+          extra: {
+            'withCredentials': true,
+          },
         ),
         cancelToken: cancelToken,
         data: data,
         queryParameters: queryParameters,
       );
-
       return WebResponse<T>.fromJson(res.data);
     } on DioError catch (e) {
       switch (e.type) {
-        case DioErrorType.CANCEL:
+        case DioErrorType.cancel:
           break;
-        case DioErrorType.RESPONSE:
+        case DioErrorType.response:
           throw WebErrorResponse.fromJson(e.response.data);
           break;
-        case DioErrorType.DEFAULT:
+        case DioErrorType.other:
         default:
           throw e;
       }

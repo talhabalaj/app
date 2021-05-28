@@ -1,11 +1,12 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_editor/image_editor.dart';
 
 class EditImageScreen extends StatefulWidget {
-  final File image;
+  final Uint8List image;
 
   EditImageScreen({this.image});
 
@@ -66,7 +67,7 @@ class _EditImageScreenState extends State<EditImageScreen> {
       body: Container(
         color: Colors.black,
         padding: const EdgeInsets.all(20.0),
-        child: ExtendedImage.file(
+        child: ExtendedImage.memory(
           widget.image,
           fit: BoxFit.contain,
           mode: ExtendedImageMode.editor,

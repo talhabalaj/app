@@ -7,12 +7,12 @@ Future showErrorDialog({BuildContext context, WebErrorResponse e}) {
   print(e.code);
   return showDialog(
     context: context,
-    child: AlertDialog(
+    builder: (context) => AlertDialog(
       content: Text(e.message),
       contentTextStyle: kTextStyle,
       title: Text(e.type),
       actions: <Widget>[
-        FlatButton(
+        TextButton(
           child: Text("Close"),
           onPressed: () {
             Navigator.pop(context);
@@ -27,17 +27,17 @@ Future<bool> showConfirmationDialog(
     {@required BuildContext context, String title, String desc}) {
   return showDialog(
     context: context,
-    child: AlertDialog(
+    builder: (context) => AlertDialog(
       title: Text(title),
       content: Text(desc),
       actions: <Widget>[
-        FlatButton(
+        TextButton(
           onPressed: () {
             Navigator.pop(context, true);
           },
           child: Text('Yes'),
         ),
-        FlatButton(
+        TextButton(
           onPressed: () {
             Navigator.pop(context, false);
           },
