@@ -1,8 +1,8 @@
-import 'dart:io';
+
 import 'dart:typed_data';
+
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_editor/image_editor.dart';
 
 class EditImageScreen extends StatefulWidget {
@@ -54,12 +54,7 @@ class _EditImageScreenState extends State<EditImageScreen> {
                 imageEditorOption: option,
               );
 
-              final image = await FlutterImageCompress.compressWithList(
-                  result.toList(),
-                  quality: 100,
-                  format: CompressFormat.jpeg);
-
-              Navigator.pop(context, image);
+              Navigator.pop(context, result);
             },
           ),
         ],

@@ -16,6 +16,7 @@ import 'package:Moody/services/feed_service.dart';
 import 'package:Moody/services/post_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:extended_image/extended_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_moment/simple_moment.dart';
@@ -91,9 +92,10 @@ class _PostWidgetState extends State<PostWidget> {
               ? ExtendedImage.network(
                   widget.post.imageUrl,
                   cache: true,
-                  fit: BoxFit.fill,
                   height: MediaQuery.of(context).size.width,
-                  mode: ExtendedImageMode.gesture,
+                  mode: kIsWeb
+                      ? ExtendedImageMode.none
+                      : ExtendedImageMode.gesture,
                   initGestureConfigHandler: (state) => GestureConfig(
                     minScale: 1,
                     maxScale: 2,
@@ -103,7 +105,9 @@ class _PostWidgetState extends State<PostWidget> {
               : ExtendedImage.memory(
                   Uint8List.fromList(widget.post.image),
                   height: MediaQuery.of(context).size.width,
-                  fit: BoxFit.fill,
+                  mode: kIsWeb
+                      ? ExtendedImageMode.none
+                      : ExtendedImageMode.gesture,
                 ),
         ),
         IconTheme(

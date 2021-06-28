@@ -6,7 +6,9 @@ import 'package:flutter/foundation.dart';
 
 enum HttpRequestMethod { GET, POST, DELETE, PUT }
 
-final String baseUrl = kDebugMode
+final bool debugging = false;
+
+final String baseUrl = (kDebugMode && debugging)
     ? (kIsWeb ? "http://localhost:5000" : "http://10.0.2.2:5000")
     : "https://moody-backend.talhabalaj.com";
 final String apiUrl = "$baseUrl/app/api/v1";

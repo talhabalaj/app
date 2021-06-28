@@ -16,7 +16,9 @@ import 'package:Moody/services/auth_service.dart';
 import 'package:Moody/services/feed_service.dart';
 import 'package:Moody/services/notification_service.dart';
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_editor_pro/image_editor_pro.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -107,53 +109,57 @@ class _HomeScreenState extends State<HomeScreen> {
           resizeToAvoidBottomInset: false,
           floatingActionButton: FloatingActionButton(
             onPressed: () async {
-              final pickedFile =
-                  await ImagePicker().getImage(source: ImageSource.gallery);
+              var image = await (await ImagePicker()
+                      .getImage(source: ImageSource.gallery))
+                  .readAsBytes();
 
-              if (pickedFile != null) {
-                final image = await pickedFile.readAsBytes();
-                final imageEdited = await Navigator.of(context).push(
+              if (image == null) return;
+
+              if (!kIsWeb) {
+                image = await Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => EditImageScreen(image: image),
+                    builder: (context) => EditImageScreen(
+                      image: image,
+                    ),
+                  ),
+                );
+              }
+
+              if (image != null) {
+                this.setState(() {
+                  index = 0;
+                });
+                final controller = TextEditingController();
+
+                await showDialog<String>(
+                  context: context,
+                  builder: (context) => SimpleDialog(
+                    title: Text("Add Caption"),
+                    children: <Widget>[
+                      TextField(
+                        controller: controller,
+                      ),
+                      TextButton(
+                        child: Text("Done"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
                   ),
                 );
 
-                if (imageEdited != null) {
-                  this.setState(() {
-                    index = 0;
-                  });
-                  final controller = TextEditingController();
-
-                  await showDialog<String>(
-                    context: context,
-                    builder: (context) => SimpleDialog(
-                      title: Text("Add Caption"),
-                      children: <Widget>[
-                        TextField(
-                          controller: controller,
-                        ),
-                        TextButton(
-                          child: Text("Done"),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
-                    ),
-                  );
-
-                  String caption = controller.text;
-                  final createPost = PostModel.inMemory(
-                    image: imageEdited,
-                    caption: caption,
-                    user: Provider.of<AuthService>(context, listen: false).user,
-                  );
-                  try {
-                    await Provider.of<FeedService>(context, listen: false)
-                        .createPost(createPost);
-                  } on WebErrorResponse catch (e) {
-                    showErrorDialog(context: context, e: e);
-                  }
+                String caption = controller.text;
+                final createPost = PostModel.inMemory(
+                  image: image,
+                  caption: caption,
+                  user: Provider.of<AuthService>(context, listen: false).user,
+                );
+                try {
+                  await Provider.of<FeedService>(context, listen: false)
+                      .createPost(createPost);
+                } on WebErrorResponse catch (e) {
+                  showErrorDialog(context: context, e: e);
                 }
               }
             },

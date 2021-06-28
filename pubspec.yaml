@@ -33,7 +33,6 @@ dependencies:
   flutter_image_compress: ^1.0.0
   animations: ^2.0.0
   extended_image: ^4.1.0 
-  image_editor: ^1.0.0
   eva_icons_flutter: ^3.0.0
   google_fonts: ^2.1.0
   toast: ^0.1.5
@@ -43,8 +42,11 @@ dependencies:
   socket_io_client: ^1.0.1
   scroll_to_index: ^2.0.0
   flutter_dotenv: ^3.1.0
+  image_editor: 
+  
   emoji_keyboard:
     git: https://github.com/talhabalaj/flutter_emoji_keyboard
+  image_editor_pro: ^1.1.8
 
 dev_dependencies:
   flutter_test:
